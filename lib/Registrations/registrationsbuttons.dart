@@ -27,7 +27,7 @@ class _Registrationsbuttons extends State<Registrationsbuttons> {
            },
            child: Container(
                height: 50,
-               width: 100,
+               width: 250,
                margin: const EdgeInsets.symmetric(horizontal: 50),
                decoration: BoxDecoration(
                  color: Colors.blueAccent,
@@ -38,7 +38,7 @@ class _Registrationsbuttons extends State<Registrationsbuttons> {
                    'SAVE',
                    style: TextStyle(
                        color: Colors.white,
-                       fontSize: 15,
+                       fontSize: 20,
                        fontWeight: FontWeight.bold),
                  ),
                )

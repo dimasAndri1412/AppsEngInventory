@@ -3,6 +3,13 @@ import 'package:flutter/cupertino.dart';
 // RegistrationKey
 final GlobalKey<FormState> formKeys = GlobalKey<FormState>();
 
+// LoginPageKey
+final GlobalKey<FormState> loginkeys = GlobalKey<FormState>();
+
+// LoginPageController
+final loginUserNameController = TextEditingController();
+final loginPasswordController = TextEditingController();
+
 // RegistrationController
 final usernamecontroller = TextEditingController();
 final frontNameController = TextEditingController();
