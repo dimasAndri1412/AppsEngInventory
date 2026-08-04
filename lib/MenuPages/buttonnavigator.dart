@@ -11,9 +11,10 @@ class _ButtonNavigatorPagesState extends State<ButtonNavigatorPages> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      backgroundColor: const Color(0xff17346E),
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
-      unselectedItemColor: Colors.grey,
+      selectedItemColor: Colors.blueAccent,
+      unselectedItemColor: Colors.white,
       currentIndex: 0,
       items: const [
 

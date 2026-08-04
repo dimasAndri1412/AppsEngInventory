@@ -19,15 +19,27 @@ class _MenupagesState extends State<Menupages> {
       appBar: AppBar(
         backgroundColor: const Color(0xff17346E),
         elevation: 0,
-        leading: const Icon(Icons.menu),
-        title: const Text("Dashboard"),
+        leading: const Icon(
+            Icons.menu,
+            color: Colors.white,
+        ),
+        title: const Text(
+            "Dashboard",
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold
+            ),
+        ),
         centerTitle: true,
         actions: [
           Stack(
             children: [
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.notifications),
+                icon: const Icon(
+                    Icons.notifications,
+                    color: Colors.white,
+                ),
               ),
               Positioned(
                 right: 10,

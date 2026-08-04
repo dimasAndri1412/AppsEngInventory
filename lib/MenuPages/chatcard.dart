@@ -11,21 +11,29 @@ class ChatCard extends StatefulWidget {
 class _ChatCardState extends State<ChatCard> {
   @override
   Widget build(BuildContext context) {
-    return LineChart(
-      LineChartData(
-        borderData: FlBorderData(show: false),
-        gridData: const FlGridData(show: false),
-        titlesData: const FlTitlesData(show: true),
-        lineBarsData: [
-          LineChartBarData(
-            spots: [
-              const FlSpot(0, 2),
-              const FlSpot(1, 5),
-              const FlSpot(2, 3),
-              const FlSpot(3, 6),
-            ],
-          ),
-        ],
+    return Container(
+      height: 250,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: LineChart(
+        LineChartData(
+          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(show: false),
+          titlesData: const FlTitlesData(show: true),
+          lineBarsData: [
+            LineChartBarData(
+              spots: const [
+                FlSpot(0, 2),
+                FlSpot(1, 5),
+                FlSpot(2, 3),
+                FlSpot(3, 6),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
