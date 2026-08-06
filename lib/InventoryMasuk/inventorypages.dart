@@ -1,17 +1,15 @@
-import 'package:appsenginventory/HomePages/homepagesmenus.dart';
-import 'package:appsenginventory/Registrations/registrationsheaders.dart';
-import 'package:appsenginventory/Registrations/registrationswrappers.dart';
+import 'package:appsenginventory/InventoryMasuk/inventorywrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-class RegistrationsMenu extends StatefulWidget {
-  const RegistrationsMenu({super.key});
+class InventoryPages extends StatefulWidget {
+  const InventoryPages({super.key});
 
   @override
-  State<RegistrationsMenu> createState() => _RegistrationsMenuState();
+  State<InventoryPages> createState() => _InventoryPagesState();
 }
 
-class _RegistrationsMenuState extends State<RegistrationsMenu> {
+class _InventoryPagesState extends State<InventoryPages> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -30,11 +28,11 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
           backgroundColor: const Color.fromARGB(255, 8, 36, 87),
           iconTheme: const IconThemeData(color: Colors.white),
           title: const Text(
-            "REGISTRATIONS USER",
+            "BARANG MASUK",
             style: TextStyle(
               fontSize: 24,
               color: Colors.white,
-               fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -53,19 +51,13 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
           ),
           child: Column(
             children: <Widget>[
-              const SizedBox(height: 10),
-              const Registrationsheaders(),
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(60),
-                      topRight: Radius.circular(60),
-                    ),
+                    color: Colors.white
                   ),
                   child: const SingleChildScrollView(
-                    child: Registrationswrappers(),
+                    child: InventoryWrapper(),
                   ),
                 ),
               ),
@@ -75,7 +67,7 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
       ),
     );
   }
-  Future<bool?> _showConfirmDialog(BuildContext context) async {
+  Future<Future<bool?>> _showConfirmDialog(BuildContext context) async {
     return showDialog<bool>(
         context: context,
         barrierDismissible: false,
@@ -95,7 +87,7 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
             actions: <Widget>[
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(false);
+                  Get.back();
                 },
                 child: const Text("NO",style:
                 TextStyle(color: Colors.blueAccent,
@@ -105,6 +97,7 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
               TextButton(onPressed: (){
                 Get.back();
                 //ctr_data().clear_func();
+                Get.back();
               },
                 child: const Text("YES",style:
                 TextStyle(color: Colors.blueAccent,

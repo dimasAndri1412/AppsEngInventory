@@ -1,4 +1,5 @@
 import 'package:appsenginventory/HomePages/homepagesbutton.dart';
+import 'package:appsenginventory/MenuPages/navigationmenu.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -42,7 +43,7 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                 ),
                 TextButton(
                   onPressed: () {
-                    Get.offAll(() => const Menupages());
+                    Get.offAll(() => const NavigationMenuPages());
                   },
                   child: const Text(
                     "UjiCoba MenuPages",

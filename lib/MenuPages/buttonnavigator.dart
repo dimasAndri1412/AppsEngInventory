@@ -1,3 +1,6 @@
+import 'package:appsenginventory/InventoryKeluar/inventoryoutpages.dart';
+import 'package:appsenginventory/InventoryMasuk/inventorypages.dart';
+import 'package:appsenginventory/MenuPages/menupages.dart';
 import 'package:flutter/material.dart';
 
 class ButtonNavigatorPages extends StatefulWidget {
@@ -8,6 +11,14 @@ class ButtonNavigatorPages extends StatefulWidget {
 }
 
 class _ButtonNavigatorPagesState extends State<ButtonNavigatorPages> {
+
+  int currentIndex = 0;
+  List<Widget> body = const [
+    Menupages(),
+    InventoryPages(),
+    InventoryOutPages()
+  ];
+
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
@@ -15,7 +26,12 @@ class _ButtonNavigatorPagesState extends State<ButtonNavigatorPages> {
       type: BottomNavigationBarType.fixed,
       selectedItemColor: Colors.blueAccent,
       unselectedItemColor: Colors.white,
-      currentIndex: 0,
+      currentIndex: currentIndex,
+      onTap: (int newIndex) {
+        setState(() {
+          currentIndex = newIndex;
+        });
+      },
       items: const [
 
         BottomNavigationBarItem(

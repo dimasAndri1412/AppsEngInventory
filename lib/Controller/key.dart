@@ -6,6 +6,12 @@ final GlobalKey<FormState> formKeys = GlobalKey<FormState>();
 // LoginPageKey
 final GlobalKey<FormState> loginkeys = GlobalKey<FormState>();
 
+// BarangMasukKey
+final GlobalKey<FormState> BarangMasukKey = GlobalKey<FormState>();
+
+// BarangMasukKey
+final GlobalKey<FormState> BarangKeluarKey = GlobalKey<FormState>();
+
 // LoginPageController
 final loginUserNameController = TextEditingController();
 final loginPasswordController = TextEditingController();
@@ -36,3 +42,21 @@ final idMemberControllers = TextEditingController();
 final passwordValidateControllers = TextEditingController();
 final loginPasswordValidateControllers = TextEditingController();
 final loginUserNamesValidateControllers = TextEditingController();
+
+//BarangMasuk
+final TanggalBarangMasukContorller = TextEditingController();
+final JenisBarangMasukContorller = TextEditingController();
+final JumlahBarangMasukContorller = TextEditingController();
+final SuplierBarangMasukContorller = TextEditingController();
+final PICBarangMasukContorller = TextEditingController();
+final KeteranganBarangMasukContorller = TextEditingController();
+
+// BarangKeluar
+final TanggalBarangKeluarContorller = TextEditingController();
+final JenisBarangKeluarContorller = TextEditingController();
+final JumlahBarangKeluarContorller = TextEditingController();
+final SuplierBarangKeluarContorller = TextEditingController();
+final PICBarangKeluarContorller = TextEditingController();
+final KeteranganBarangKeluarContorller = TextEditingController();
+
+

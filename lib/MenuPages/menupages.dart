@@ -117,8 +117,7 @@ class _MenupagesState extends State<Menupages> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: const ButtonNavigatorPages(),
+      )
     );
   }
 }
