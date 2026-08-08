@@ -4,6 +4,8 @@ import 'package:appsenginventory/Login/loginpagewrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Registrations/registrationsmenu.dart';
+
 class Loginpagemenus extends StatefulWidget {
   const Loginpagemenus({super.key});
 
@@ -47,36 +49,65 @@ class _LoginpagemenusState extends State<Loginpagemenus> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              const SizedBox(height: 10),
               const Loginpageheaders(),
-              const SizedBox(height: 10),
-              Center(
-                child: Padding(
-                    padding: const EdgeInsets.all(5),
-                    child: Container(
-                      margin: const EdgeInsets.symmetric(),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(60),
-                            topRight: Radius.circular(60),
-                            bottomLeft: Radius.circular(60),
-                            bottomRight: Radius.circular(60)
+              Transform.translate(
+                  offset: const Offset(0, -60),
+                  child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(5),
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(),
+                          decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(60),
+                                  topRight: Radius.circular(60),
+                                  bottomLeft: Radius.circular(60),
+                                  bottomRight: Radius.circular(60)
+                              ),
+                              boxShadow: [BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 15,
+                                  offset: Offset(2, 10)
+                              )]
+                          ),
+                          child: const SingleChildScrollView(
+                            child: Loginpagewrappers(),
+                          ),
                         ),
-                        boxShadow: [BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 15,
-                            offset: Offset(2, 10)
-                        )]
-                      ),
-                      child: const SingleChildScrollView(
-                        child: Loginpagewrappers(),
-                      ),
-                    ),
-                )
+                      )
+                  ),
               ),
-              const SizedBox(height: 20),
-              const Loginpagebuttons()
+              const Loginpagebuttons(),
+              SizedBox(
+                height: 10,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                      'Jika Belum Memiliki Account Klik?',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 15
+                    ),
+                  ),
+                  TextButton(
+                      onPressed: () {
+                        Get.offAll(() => const RegistrationsMenu());
+                      },
+                      child: Text(
+                        'Daftar!',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20
+                        ),
+                      )
+                  )
+                ],
+
+              )
             ],
           ),
         ),

@@ -1,5 +1,7 @@
 import 'package:appsenginventory/Controller/key.dart';
-import 'package:appsenginventory/Registrations/registrationsmenu.dart';
+import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/Services/gsheetscontrollers.dart';
+import 'package:appsenginventory/Services/gsheetsservices.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -11,16 +13,21 @@ class Loginpagebuttons extends StatefulWidget {
 }
 
 class _LoginpagebuttonsState extends State<Loginpagebuttons> {
+
+  bool isloading = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        GestureDetector(
-          onTap: (){
+        GestureDetector (
+          onTap: () async {
             if (loginkeys.currentState!.validate()) {
-                setState(() {
-                  Get.offAll(() => const RegistrationsMenu());
-                });
+              await validationLogins();
+              const snackBar = SnackBar(
+                content: Text('Login Sucessfully!'),
+              );
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
             } else {
               const snackBar = SnackBar(
                 content: Text('Login Gagal!, Lakukan Kembali'),

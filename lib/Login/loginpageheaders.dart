@@ -11,7 +11,7 @@ class _LoginpageheadersState extends State<Loginpageheaders> {
   @override
   Widget build(BuildContext context) {
     return  Transform.translate(
-      offset: const Offset(0, -60), // naik 30 pixel
+      offset: const Offset(0, -100), // naik 30 pixel
       child: SizedBox(
         width: 380,
         child: Image.asset(

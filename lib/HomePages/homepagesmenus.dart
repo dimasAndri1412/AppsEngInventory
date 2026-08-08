@@ -1,7 +1,10 @@
 import 'package:appsenginventory/HomePages/homepagesbutton.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/Services/gsheetscontrollers.dart';
+import 'package:appsenginventory/Services/gsheetsservices.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gsheets/gsheets.dart';
 
 import '../MenuPages/menupages.dart';
 
@@ -32,6 +35,7 @@ class _HompagesmenusState extends State<Hompagesmenus> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children:  [
+                SizedBox(height: 150),
                 Hompagesbuttons(),
                 SizedBox(height: 16),
                 Text(
@@ -47,6 +51,30 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                   },
                   child: const Text(
                     "UjiCoba MenuPages",
+                    style: TextStyle(
+                      color: Colors.blueAccent,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                TextButton(
+                  onPressed: () async {
+                    try{
+                      await GSheetsServicesEmployees.init();
+                      final data = await getDataEmployees();
+                      print(data);
+                      Get.snackbar(
+                        "Berhasil",
+                        "Total data: ${data?.length}",
+                      );
+                    } catch(e){
+                      Get.snackbar('Error', e.toString());
+                    }
+                  },
+                  child: const Text(
+                    "UjiCoba Logic",
                     style: TextStyle(
                       color: Colors.blueAccent,
                     ),

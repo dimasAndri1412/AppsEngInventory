@@ -1,3 +1,7 @@
+import 'dart:async';
+import 'package:intl/intl.dart';
+import 'package:appsenginventory/Controller/key.dart';
+import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:flutter/material.dart';
 
 class HeadersCard extends StatefulWidget {
@@ -8,8 +12,57 @@ class HeadersCard extends StatefulWidget {
 }
 
 class _HeadersCardState extends State<HeadersCard> {
+
+  bool isLoading = true;
+  DateTime now = DateTime.now();
+  Timer? timers;
+
+  @override
+  void initState() {
+    super.initState();
+    loadHeaderPages();
+
+    timers = Timer.periodic(const Duration(seconds: 1), (timers) {
+      setState(() {
+        now = DateTime.now();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    timers?.cancel();
+    super.dispose();
+  }
+
+  Future<void> loadHeaderPages() async {
+    try {
+      await headerPagesController();
+    } catch (e) {
+      debugPrint(
+        'Gagal mengambil data header: $e',
+      );
+
+    } finally {
+      if (!mounted) return;
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    String tanggal = DateFormat(
+      'EEEE, dd MMMM yyyy',
+      'id_ID',
+    ).format(now);
+
+    String jam = DateFormat(
+      'HH:mm',
+    ).format(now);
+
     return Container(
       padding: const EdgeInsets.all(15),
       decoration: BoxDecoration(
@@ -22,16 +75,15 @@ class _HeadersCardState extends State<HeadersCard> {
           )
         ],
       ),
-      child: const Row(
+      child:  Row(
         children: [
-
            CircleAvatar(
             radius: 28,
             child: Icon(Icons.person,size:40),
           ),
-
-           SizedBox(width:15),
-
+           SizedBox(
+               width:15
+           ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,39 +93,48 @@ class _HeadersCardState extends State<HeadersCard> {
                   "Selamat Datang,",
                   style: TextStyle(fontSize:12),
                 ),
-
-                SizedBox(height:5),
-
-                Text(
-                  "Aji Fredy",
+                TextFormField(
+                  controller: HomePagesUserNames,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize:22),
+                      fontSize: 22,
+                      color: Colors.black,
+                  ),
                 ),
-
-                Text("Chief Engineering"),
+                TextFormField(
+                  controller: HomePagesPositions,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Colors.black
+                  ),
+                    decoration: InputDecoration(
+                        border: InputBorder.none
+                    )
+                ),
               ],
             ),
           ),
-
           Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children:  [
-
-              Text("Kamis,23 Mei 2024"),
-
-              SizedBox(height:10),
-
               Text(
-                "10:30",
-                style: TextStyle(
-                    fontSize:32,
-                    fontWeight: FontWeight.bold),
+                tanggal,
+                style: const TextStyle(
+                  fontSize: 15,
+                ),
+              ),
+              Text(
+                jam,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
-              Text("WIB"),
+              const Text("WIB")
             ],
           )
-
         ],
       ),
     );

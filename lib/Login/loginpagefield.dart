@@ -10,7 +10,6 @@ class Loginpagefield extends StatefulWidget {
 
 class _LoginpagefieldState extends State<Loginpagefield> {
 
-  bool passHiding = true;
   bool rememberMe = false ;
   String dropDownValues = "";
   bool passwordObscured = true;
@@ -65,7 +64,7 @@ class _LoginpagefieldState extends State<Loginpagefield> {
                         )
                     ),
                     child: TextFormField(
-                      obscureText: passHiding,
+                      obscureText: passwordObscured,
                       controller: loginPasswordController,
                       decoration: InputDecoration(
                         labelText: 'Password',

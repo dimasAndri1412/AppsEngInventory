@@ -16,17 +16,12 @@ class _LoginpagewrappersState extends State<Loginpagewrappers> {
       padding: const EdgeInsets.all(50),
       child: Column(
         children: <Widget>[
-          const SizedBox(
-            height: 30,),
           Container(
             decoration: BoxDecoration(
                 color: Colors.white, borderRadius: BorderRadius.circular(60)),
             child: const SingleChildScrollView(
               child: Loginpagefield(),
             ),
-          ),
-          const SizedBox(
-            height: 30,
           ),
         ],
       ),

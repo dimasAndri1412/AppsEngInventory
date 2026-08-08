@@ -77,6 +77,8 @@ dependencies:
   pinput: ^5.0.0
   flutter_secure_storage: ^9.0.0
   fl_chart: ^0.68.0
+  gsheets: ^0.5.0
+  flutter_dotenv: ^6.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -103,6 +105,7 @@ flutter:
       - lib/assets/images/Untitled-1.png
       - lib/assets/images/logo_Kemenlu.png
       - lib/assets/images/homepic.png
+      - lib/assets/Files/gsheetsproects-face98242795.json
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

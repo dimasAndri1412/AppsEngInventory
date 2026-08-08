@@ -59,4 +59,13 @@ final SuplierBarangKeluarContorller = TextEditingController();
 final PICBarangKeluarContorller = TextEditingController();
 final KeteranganBarangKeluarContorller = TextEditingController();
 
+//HompagesController
+final HomePagesUserNames = TextEditingController();
+final HomePagesPositions = TextEditingController();
+final HomePagesTotalBarang = TextEditingController();
+final HomePagesTotalStock = TextEditingController();
+final HomePagesStockMinim = TextEditingController();
+final HomePagesStockHabis = TextEditingController();
+
+
 
