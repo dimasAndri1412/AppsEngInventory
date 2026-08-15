@@ -1,5 +1,7 @@
 import 'package:appsenginventory/HomePages/homepagesbutton.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/RevampBarangMasuk/revampbarangmasukpages.dart';
+import 'package:appsenginventory/RevampRegistrations/revampregistrationpages.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsservices.dart';
 import 'package:flutter/material.dart';
@@ -61,17 +63,9 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    try{
-                      await GSheetsServicesEmployees.init();
-                      final data = await getDataEmployees();
-                      print(data);
-                      Get.snackbar(
-                        "Berhasil",
-                        "Total data: ${data?.length}",
-                      );
-                    } catch(e){
-                      Get.snackbar('Error', e.toString());
-                    }
+                    Get.to(RevampBarangMasukPages());
+                    //await GSheetsServicesEmployees.init();
+                    //await getDataPosisi();
                   },
                   child: const Text(
                     "UjiCoba Logic",
@@ -79,7 +73,7 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                       color: Colors.blueAccent,
                     ),
                   ),
-                )
+                ),
               ],
             ),
           ),

@@ -12,9 +12,28 @@ final GlobalKey<FormState> BarangMasukKey = GlobalKey<FormState>();
 // BarangMasukKey
 final GlobalKey<FormState> BarangKeluarKey = GlobalKey<FormState>();
 
+// Revapm RegistrationKey
+final GlobalKey<FormState> revampRegistrationsKey = GlobalKey<FormState>();
+
+// Revapm Barang Masuk
+final GlobalKey<FormState> revampBarangMasukKey = GlobalKey<FormState>();
+
+// Revapm Barang Keluar
+final GlobalKey<FormState> revampBarangKeluarkKey = GlobalKey<FormState>();
+
 // LoginPageController
 final loginUserNameController = TextEditingController();
 final loginPasswordController = TextEditingController();
+
+//RevampRegist
+final List<Map<String, TextEditingController>> revampResgistControllerss = [];
+final FocusNode phoneFocusNode = FocusNode();
+
+//RevampBarangMasukController
+final List<Map<String, TextEditingController>> revampBarangMasukControllerss = [];
+
+//RevampBarangMasukController
+final List<Map<String, TextEditingController>> revampBarangKeluarControllerss = [];
 
 // RegistrationController
 final usernamecontroller = TextEditingController();
