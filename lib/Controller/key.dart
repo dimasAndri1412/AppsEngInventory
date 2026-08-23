@@ -86,5 +86,5 @@ final HomePagesTotalStock = TextEditingController();
 final HomePagesStockMinim = TextEditingController();
 final HomePagesStockHabis = TextEditingController();
 
-
-
+// Search Barang
+final TextEditingController searchController = TextEditingController();

@@ -1,7 +1,7 @@
-import 'package:appsenginventory/InventoryKeluar/inventoryoutpages.dart';
-import 'package:appsenginventory/InventoryMasuk/inventorypages.dart';
+import 'package:appsenginventory/ListBarangDiLemari/listbarangperlemari.dart';
 import 'package:appsenginventory/MenuPages/menupages.dart';
 import 'package:flutter/material.dart';
+import '../RevampBarangKeluar/revampbarangkeluarpages.dart';
 
 class NavigationMenuPages extends StatefulWidget {
   const NavigationMenuPages({super.key});
@@ -16,8 +16,8 @@ class _NavigationMenuPagesState extends State<NavigationMenuPages> {
 
   final List<Widget> pages = const [
     Menupages(),
-    InventoryPages(),
-    InventoryOutPages()
+    Listbarangperlemari(),
+    RevampBarangKeluarPages()
   ];
 
   @override
@@ -45,11 +45,6 @@ class _NavigationMenuPagesState extends State<NavigationMenuPages> {
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory),
             label: "Barang",
-          ),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.login),
-            label: "Masuk",
           ),
 
           BottomNavigationBarItem(

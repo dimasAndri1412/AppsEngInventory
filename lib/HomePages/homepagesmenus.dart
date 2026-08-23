@@ -1,5 +1,6 @@
 import 'package:appsenginventory/HomePages/homepagesbutton.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/RevampBarangKeluar/revampbarangkeluarpages.dart';
 import 'package:appsenginventory/RevampBarangMasuk/revampbarangmasukpages.dart';
 import 'package:appsenginventory/RevampRegistrations/revampregistrationpages.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
@@ -18,6 +19,8 @@ class Hompagesmenus extends StatefulWidget {
 }
 
 class _HompagesmenusState extends State<Hompagesmenus> {
+
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
@@ -63,7 +66,9 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    Get.to(RevampBarangMasukPages());
+                    //Get.to(() => const RevampBarangKeluarPages());
+                    //await GSheetsServicesEmployees.init();
+                    //await getDataBarangLemari1();
                     //await GSheetsServicesEmployees.init();
                     //await getDataPosisi();
                   },

@@ -34,52 +34,17 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
     stokAkhir <= stokMinimum ? "⚠ KURANG" : "✓ AMAN";
   }
 
-  Future<void> generateNoBarangMasuk(
-      Map<String, TextEditingController> controllersss) async {
-    try {
-      await GSheetsServicesEmployees.init();
+  Future<void> generateNoBarangMasuk(Map<String, TextEditingController> controllersss,) async {
 
-      final rows =
-      await GSheetsServicesEmployees.sheetsBarangMasuk!.values.allRows();
+    final index = revampBarangMasukControllerss.indexOf(controllersss);
+    final noUrut = index == -1
+        ? revampBarangMasukControllerss.length + 1
+        : index + 1;
 
-      if (rows.isEmpty) {
-        controllersss["nomerUrut"]!.text = "1";
-        return;
-      }
-
-      int headerRow = -1;
-      int noIndex = -1;
-
-      for (int r = 0; r < rows.length; r++) {
-        for (int c = 0; c < rows[r].length; c++) {
-          final value = rows[r][c].toString().trim().toLowerCase();
-
-          if (value == "no") {
-            noIndex = c;
-            headerRow = r;
-            break;
-          }
-        }
-        if (noIndex != -1) break;
-      }
-
-      if (noIndex == -1) return;
-
-      int nextNo = 1;
-
-      for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > noIndex) {
-          final nomor = int.tryParse(rows[i][noIndex].trim());
-          if (nomor != null) {
-            nextNo = nomor + 1;
-            break;
-          }
-        }
-      }
-
-      controllersss["nomerUrut"]!.text = nextNo.toString();
-    } catch (e) {
-      debugPrint("Error generate nomor Barang Masuk: $e");
+    if ((controllersss["tanggalBarangMasuk"]?.text ?? "").isNotEmpty) {
+      controllersss["nomerUrut"]?.text = noUrut.toString();
+    } else {
+      controllersss["nomerUrut"]?.clear();
     }
   }
 
@@ -391,21 +356,20 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
 
   @override
   void dispose() {
-    for (var controllers in revampBarangMasukControllerss
-    ) {
+    for (var controllers in revampBarangMasukControllerss) {
       for (var controller in controllers.values) {
         controller.dispose();
       }
     }
+    revampBarangMasukControllerss.clear();
     super.dispose();
   }
 
 
   void addNewsContainers() {
+    final controllers = createBarangMasukControllers();
     setState(() {
-      revampBarangMasukControllerss.add(
-        createBarangMasukControllers(),
-      );
+      revampBarangMasukControllerss.add(controllers);
     });
   }
 
@@ -543,11 +507,6 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
                   hintStyle: TextStyle(color: Colors.black26),
                   border: InputBorder.none,
                   prefixIcon: Icon(Icons.note_add)),
-              onChanged: (value) async {
-                if (value.isNotEmpty) {
-                  await generateNoBarangMasuk(controllersss);
-                }
-              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return "Nama Barang Masuk Tidak Boleh Kosong!";
@@ -618,7 +577,8 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
                               DropdownMenuItem(value: "PCS", child: Text("PCS")),
                               DropdownMenuItem(value: "UNIT", child: Text("UNIT")),
                             ],
-                            onChanged: (value) {
+                            onChanged: (value) async {
+                              await generateNoBarangMasuk(controllersss);
                               setState(() {
                                 controllersss["satuanBarangController"]!.text = value ?? "";
                               });

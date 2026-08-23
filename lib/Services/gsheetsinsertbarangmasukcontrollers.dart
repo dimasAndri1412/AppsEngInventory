@@ -33,8 +33,8 @@ class GsheetsInsertBarangMasuk {
 
     final List<String> row = [
       revampNomerUrutBarangMasuk?.trim() ?? '',
-      revampKodeBarangMasuk?.trim() ?? '',
       revampTanggalBarangMasuk?.trim() ?? '',
+      revampKodeBarangMasuk?.trim() ?? '',
       revampNamaBarangMasuk?.trim() ?? '',
       revampJumlahBarangMasuk?.trim() ?? '',
       revampSatuanBarangMasuk?.trim() ?? '',

@@ -1,4 +1,6 @@
 import 'package:appsenginventory/Controller/key.dart';
+import 'package:appsenginventory/MenuPages/menupages.dart';
+import 'package:appsenginventory/MenuPages/navigationmenu.dart';
 import 'package:appsenginventory/Services/gsheetsinsertbarangmasuklemari2.dart';
 import 'package:appsenginventory/Services/gsheetsinsertbarangmasuklemari3.dart';
 import 'package:appsenginventory/Services/gsheetstinsertbarangmasuklemari1.dart';
@@ -6,8 +8,6 @@ import 'package:appsenginventory/Services/gsheetsinsertbarangmasukcontrollers.da
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
-
-import '../HomePages/homepagesmenus.dart';
 import '../Services/gsheetsservices.dart';
 
 class RevampBarangMasukButtons extends StatefulWidget {
@@ -38,8 +38,8 @@ class _RevampBarangMasukButtonsState extends State<RevampBarangMasukButtons> {
       ) {
         final controllers = revampBarangMasukControllerss[index];
         final nomerUrutBarangMasuk = controllers["nomerUrut"]?.text.trim() ?? '';
-        final kodeBarangMasuk = controllers["kodeBarangMasuk"]?.text.trim() ?? '';
         final tanggalBarangMasuk = controllers["tanggalBarangMasuk"]?.text.trim() ?? '';
+        final kodeBarangMasuk = controllers["kodeBarangMasuk"]?.text.trim() ?? '';
         final namaBarangMasuk = controllers["namaBarangMasuk"]?.text.trim() ?? '';
         final jumlahBarangMasuk = controllers["jumlahBarangMasuk"]?.text.trim() ?? '';
         final satuanBarangMasuk = controllers["satuanBarangController"]?.text.trim() ?? '';
@@ -128,7 +128,7 @@ class _RevampBarangMasukButtonsState extends State<RevampBarangMasukButtons> {
       insertControllerLemari1.revampNamaBarangMasuk = controllers["namaBarangMasuk"]?.text.trim() ?? '';
       insertControllerLemari1.revampJumlahBarangMasuk = controllers["jumlahBarangMasuk"]?.text.trim() ?? '';
       insertControllerLemari1.revampSatuanBarangMasuk = controllers["satuanBarangController"]?.text.trim() ?? '';
-      insertControllerLemari1.revampTotalBarangMasuk = controllers["totalBarangMasukLemar3"]?.text.trim() ?? '';
+      insertControllerLemari1.revampTotalBarangMasuk = controllers["totalBarangMasukLemari3"]?.text.trim() ?? '';
       insertControllerLemari1.revampTotalBarangKeluar = controllers["totalBarangKeluarLemari3"]?.text.trim() ?? '';
       insertControllerLemari1.revampJumlahAkhirBarangMasuk = controllers["totalJumlahAkhirLemari3"]?.text.trim() ?? '';
       insertControllerLemari1.revampJumlahMinimunBarangMasuk = controllers["jumlahMinimumBarangMasukLemari3"]?.text.trim() ?? '';
@@ -176,7 +176,8 @@ class _RevampBarangMasukButtonsState extends State<RevampBarangMasukButtons> {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Data Berhasil Disimpan")),
             );
-            Get.to(() => const Hompagesmenus());
+//            Get.to(() => const Menupages());
+            Get.to(() => const NavigationMenuPages());
           },
           child: Container(
             height: 60,
