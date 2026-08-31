@@ -1,4 +1,5 @@
-import 'package:appsenginventory/HomePages/homepagesmenus.dart';
+import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/SendingEmail/sendingemailfunctions.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsinsertcontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsservices.dart';
@@ -66,17 +67,7 @@ class _RevampRegistrationButtonsState extends State<RevampRegistrationButtons> {
         insertController.revampPass = password;
         await insertController.revampRegistrations();
       }
-
       if (!mounted) return;
-
-      for (final controllers in revampResgistControllerss
-      ) {
-        for (final controller in controllers.values
-        ) {
-          controller.clear();
-        }
-      }
-
     } catch (e) {
 
       debugPrint(
@@ -86,55 +77,87 @@ class _RevampRegistrationButtonsState extends State<RevampRegistrationButtons> {
     }
   }
 
+  void clearRegistrationControllers() {
+    try {
+      for (final controllers in revampResgistControllerss) {
+        for (final controller in controllers.values) {
+          controller.clear();
+        }
+      }
+      debugPrint(
+        "Semua controller berhasil di-clear.",
+      );
+    } catch (e) {
+      debugPrint(
+        "ERROR CLEAR CONTROLLER: $e",
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         GestureDetector(
-          onTap: () async {
-            try {
-              bool isAvailable = await validationEmail();
-              if (!revampRegistrationsKey.currentState!.validate()) {
-                const snackBar = SnackBar(
-                  content: Text(
-                    'Gagal Menyimpan Data!',
-                  ),
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                return;
-              }
+        onTap: () async {
+      try {
+        final bool isAvailable = await validationEmail();
+        if (!revampRegistrationsKey.currentState!.validate()) {
+          const snackBar = SnackBar(
+            content: Text('Gagal Menyimpan Data!'),
+          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              snackBar,
+            );
+          }
+          return;
+        }
 
-              if (!isAvailable) {
-                const snackBar = SnackBar(
-                  content: Text(
-                    'Email Sudah pernah didaftarkan!',
-                  ),
-                );
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                }
-                return;
-              }
-              await insertRegist();
-              const snackBar = SnackBar(content: Text(
-                  'Data Berhasil Disimpan',
-                ),
-              );
+        if (!isAvailable) {
+          const snackBar = SnackBar(
+            content: Text(
+              'Email Sudah pernah didaftarkan!',
+            ),
+          );
 
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              Get.to(() => const Hompagesmenus(),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Gagal menyimpan data: $e',
-                  ),
-                ),
-              );
-            }
-          },
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              snackBar,
+            );
+          }
+          return;
+        }
+
+        await insertRegist();
+        await const Sendingemailfunctions().sendingEmailFunc();
+        clearRegistrationControllers();
+
+        const snackBar = SnackBar(
+          content: Text('Data Berhasil Disimpan'),
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            snackBar,
+          );
+        }
+        if (mounted) {
+          Get.to(() => const NavigationMenuPages());
+        }
+      } catch (e) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Gagal menyimpan data: $e',
+            ),
+          ),
+        );
+      }
+    },
           child: Container(
             height: 60,
             width: 300,

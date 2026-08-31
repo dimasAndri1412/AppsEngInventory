@@ -30,7 +30,7 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
           backgroundColor: const Color.fromARGB(255, 8, 36, 87),
           iconTheme: const IconThemeData(color: Colors.white),
           title: const Text(
-            "REGISTRATIONS USER",
+            "REGISTRATIONS",
             style: TextStyle(
               fontSize: 24,
               color: Colors.white,
@@ -44,10 +44,9 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               colors: [
-                Color.fromARGB(255, 8, 36, 87),     // Navy gelap
-                Color.fromARGB(255, 26, 74, 138),   // Biru tua
-                Color.fromARGB(255, 90, 149, 222),  // Biru muda
                 Color.fromARGB(255, 255, 255, 255), // Putih
+                Color.fromARGB(255, 90, 149, 222),
+                Color.fromARGB(255, 26, 74, 138),   // Biru tua// Biru muda
               ],
             ),
           ),

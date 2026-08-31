@@ -18,49 +18,62 @@ class SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(.1),
-            blurRadius: 10,
-          )
-        ],
+    return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 4,
+      shadowColor: Colors.black26,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        children: [
-
-          Expanded(
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.start,
-              children: [
-
-                Text(title),
-
-                const SizedBox(height:8),
-
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize:28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-
-                Text(unit),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 30,
             ),
-          ),
 
-          CircleAvatar(
-            backgroundColor: color,
-            child: Icon(icon,color: Colors.white),
-          )
-        ],
+            const SizedBox(height: 5),
+
+            Flexible(
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 3),
+
+            Text(
+              value,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            Text(
+              unit,
+              style: const TextStyle(
+                fontSize: 11,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

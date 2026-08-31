@@ -79,13 +79,13 @@ class _LoginpagemenusState extends State<Loginpagemenus> {
                   ),
               ),
               const Loginpagebuttons(),
-              SizedBox(
+              const SizedBox(
                 height: 10,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
+                  const Text(
                       'Jika Belum Memiliki Account Klik?',
                     style: TextStyle(
                       color: Colors.white,
@@ -94,9 +94,9 @@ class _LoginpagemenusState extends State<Loginpagemenus> {
                   ),
                   TextButton(
                       onPressed: () {
-                        Get.offAll(() => const RegistrationsMenu());
+                        Get.to(() => const RegistrationsMenu());
                       },
-                      child: Text(
+                      child: const Text(
                         'Daftar!',
                         style: TextStyle(
                             color: Colors.white,

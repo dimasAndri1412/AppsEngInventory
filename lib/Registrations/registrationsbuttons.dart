@@ -1,5 +1,8 @@
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../HomePages/homepagesmenus.dart';
+import '../Services/gsheetscontrollers.dart';
 
 
 class Registrationsbuttons extends StatefulWidget {
@@ -10,19 +13,72 @@ class Registrationsbuttons extends StatefulWidget {
 }
 
 class _Registrationsbuttons extends State<Registrationsbuttons> {
+
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
          GestureDetector(
-           onTap: (){
-             if (formKeys.currentState!.validate()) {
-
-             } else {
-               const snackBar = SnackBar(
-                 content: Text('Registrations Gagal!'),
+           onTap: isLoading
+               ? null
+               : () async {
+             if (!formKeys.currentState!.validate()) {
+               ScaffoldMessenger.of(context).showSnackBar(
+                 const SnackBar(
+                   content: Text(
+                     'Data belum lengkap. Silakan periksa kembali.',
+                   ),
+                 ),
                );
-               ScaffoldMessenger.of(context).showSnackBar(snackBar);
+               return;
+             }
+             setState(() {
+               isLoading = true;
+             });
+             try {
+               final bool results = await validationEmailAndUserNameFirstLogin();
+               if (!mounted) return;
+
+               if (results) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(
+                     content: Text(
+                       'Data berhasil Tersimpan!',
+                     ),
+                     backgroundColor: Colors.green,
+                   ),
+                 );
+                 Get.to(() => const Homepagesmenus());
+               } else {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                   const SnackBar(
+                     content: Text(
+                       'Data Tidak Berhasil Tersimpan!.',
+                     ),
+                     backgroundColor: Colors.red,
+                   ),
+                 );
+               }
+             } catch (e) {
+               if (!mounted) return;
+
+               ScaffoldMessenger.of(context).showSnackBar(
+                 SnackBar(
+                   content: Text(
+                     'Terjadi kesalahan: $e',
+                   ),
+                   backgroundColor: Colors.red,
+                 ),
+               );
+
+             } finally {
+               if (mounted) {
+                 setState(() {
+                   isLoading = false;
+                 });
+               }
              }
            },
            child: Container(

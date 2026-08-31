@@ -1,5 +1,7 @@
+import 'package:appsenginventory/ChangesPassword/changespasswordpages.dart';
 import 'package:appsenginventory/HomePages/homepagesbutton.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/OTPVerfications/EmailOTP/emailotppages.dart';
 import 'package:appsenginventory/RevampBarangKeluar/revampbarangkeluarpages.dart';
 import 'package:appsenginventory/RevampBarangMasuk/revampbarangmasukpages.dart';
 import 'package:appsenginventory/RevampRegistrations/revampregistrationpages.dart';
@@ -11,14 +13,14 @@ import 'package:gsheets/gsheets.dart';
 
 import '../MenuPages/menupages.dart';
 
-class Hompagesmenus extends StatefulWidget {
-  const Hompagesmenus({super.key});
+class Homepagesmenus extends StatefulWidget {
+  const Homepagesmenus({super.key});
 
   @override
-  State<Hompagesmenus> createState() => _HompagesmenusState();
+  State<Homepagesmenus> createState() => _HomepagesmenusState();
 }
 
-class _HompagesmenusState extends State<Hompagesmenus> {
+class _HomepagesmenusState extends State<Homepagesmenus> {
 
 
   @override
@@ -66,6 +68,7 @@ class _HompagesmenusState extends State<Hompagesmenus> {
                 ),
                 TextButton(
                   onPressed: () async {
+                    Get.to(() => EmailOTPPages());
                     //Get.to(() => const RevampBarangKeluarPages());
                     //await GSheetsServicesEmployees.init();
                     //await getDataBarangLemari1();

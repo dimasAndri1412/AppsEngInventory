@@ -77,25 +77,24 @@ class _HeadersCardState extends State<HeadersCard> {
       ),
       child:  Row(
         children: [
-           CircleAvatar(
+           const CircleAvatar(
             radius: 28,
             child: Icon(Icons.person,size:40),
           ),
-           SizedBox(
+          const SizedBox(
                width:15
            ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children:  [
-
-                Text(
+                const Text(
                   "Selamat Datang,",
                   style: TextStyle(fontSize:12),
                 ),
                 TextFormField(
                   controller: HomePagesUserNames,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 22,
                       color: Colors.black,
@@ -103,12 +102,12 @@ class _HeadersCardState extends State<HeadersCard> {
                 ),
                 TextFormField(
                   controller: HomePagesPositions,
-                  style: TextStyle(
+                  style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 12,
                       color: Colors.black
                   ),
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                         border: InputBorder.none
                     )
                 ),

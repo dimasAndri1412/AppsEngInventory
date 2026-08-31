@@ -21,6 +21,24 @@ final GlobalKey<FormState> revampBarangMasukKey = GlobalKey<FormState>();
 // Revapm Barang Keluar
 final GlobalKey<FormState> revampBarangKeluarkKey = GlobalKey<FormState>();
 
+// Changes password key
+final GlobalKey<FormState> changesPasswordKey = GlobalKey<FormState>();
+
+// Changes password key
+final GlobalKey<FormState> changesPasswordSettingKey = GlobalKey<FormState>();
+
+// Changes Personal key
+final GlobalKey<FormState> changesPersonalSettingKey = GlobalKey<FormState>();
+
+// Forgot password key
+final GlobalKey<FormState> forgotpasswordkey = GlobalKey<FormState>();
+
+// OTP Key
+final GlobalKey<FormState> otpveryficationskeys = GlobalKey<FormState>();
+
+// emailOTPKey
+final GlobalKey<FormState> otpEmailKeys = GlobalKey<FormState>();
+
 // LoginPageController
 final loginUserNameController = TextEditingController();
 final loginPasswordController = TextEditingController();
@@ -36,6 +54,7 @@ final List<Map<String, TextEditingController>> revampBarangMasukControllerss = [
 final List<Map<String, TextEditingController>> revampBarangKeluarControllerss = [];
 
 // RegistrationController
+final employeeIdController = TextEditingController();
 final usernamecontroller = TextEditingController();
 final frontNameController = TextEditingController();
 final backNameController = TextEditingController();
@@ -51,6 +70,7 @@ final newpasswordcontorller = TextEditingController();
 final newconfpasswordcontroller = TextEditingController();
 final loginflagecontroller = TextEditingController();
 final passcontroller = TextEditingController();
+final positionscontrollers = TextEditingController();
 final idController = TextEditingController();
 final confPassController = TextEditingController();
 final projectController = TextEditingController();
@@ -88,3 +108,64 @@ final HomePagesStockHabis = TextEditingController();
 
 // Search Barang
 final TextEditingController searchController = TextEditingController();
+
+//Changes Password Controller
+final changesPasswordConfirmPassword = TextEditingController();
+final changesPasswordNewPassword = TextEditingController();
+final changesPasswordUserName = TextEditingController();
+final changesPasswordEmail = TextEditingController();
+
+//Changes Password Controller Setting
+final changesPasswordSettingConfirmPassword = TextEditingController();
+final changesPasswordSettingNewPassword = TextEditingController();
+final changesPasswordSettingUserName = TextEditingController();
+final changesPasswordSettingEmail = TextEditingController();
+
+//Changes Password Controller
+final forgotPasswordConfirmPassword = TextEditingController();
+final forgotPasswordNewPassword = TextEditingController();
+final forgotPasswordUserName = TextEditingController();
+final forgotPasswordEmail = TextEditingController();
+
+// Changes Personal Setting Controller
+final changesPersonalSettingUserName = TextEditingController();
+final changesPersonalSettingEmail = TextEditingController();
+final changesPersonalSettingNomerTelpon = TextEditingController();
+final changesPersonalSettingAlamat = TextEditingController();
+
+//otpemailcontrollers
+final otpcontrollers = TextEditingController();
+final otpemailcontroller = TextEditingController();
+final sendOTPControllers = TextEditingController();
+final otpFullNamesController = TextEditingController();
+final otpCreateTimes = TextEditingController();
+final emailscontroller = TextEditingController();
+
+//SideBar Controller
+final sideBarFullNameController = TextEditingController();
+final sideBarJabatanController = TextEditingController();
+final sideBarPosisiController = TextEditingController();
+final sideBarEmployeeIDController = TextEditingController();
+final sideBarUserNamesController = TextEditingController();
+
+// card controller
+final jumlahJenisBarangLemari1Controller = TextEditingController();
+final totalStokAwalLemari1Controller = TextEditingController();
+final totalBarangMasukLemari1Controller = TextEditingController();
+final totalBarangKeluarLemari1Controller = TextEditingController();
+final totalStokSaatIniLemari1Controller = TextEditingController();
+final jumlahBarangKurangLemari1Controller = TextEditingController();
+
+final jumlahJenisBarangLemari2Controller = TextEditingController();
+final totalStokAwalLemari2Controller = TextEditingController();
+final totalBarangMasukLemari2Controller = TextEditingController();
+final totalBarangKeluarLemari2Controller = TextEditingController();
+final totalStokSaatIniLemari2Controller = TextEditingController();
+final jumlahBarangKurangLemari2Controller = TextEditingController();
+
+final jumlahJenisBarangLemari3Controller = TextEditingController();
+final totalStokAwalLemari3Controller = TextEditingController();
+final totalBarangMasukLemari3Controller = TextEditingController();
+final totalBarangKeluarLemari3Controller = TextEditingController();
+final totalStokSaatIniLemari3Controller = TextEditingController();
+final jumlahBarangKurangLemari3Controller = TextEditingController();

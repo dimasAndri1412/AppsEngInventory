@@ -1,8 +1,14 @@
+import 'package:appsenginventory/ChangesPassword/changespasswordpages.dart';
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/OTPVerfications/EmailOTP/emailotppages.dart';
+import 'package:appsenginventory/OTPVerfications/otpverificationspages.dart';
+import 'package:appsenginventory/Services/gsheetsinsertregistrationsfirstuser.dart';
+import 'package:appsenginventory/Services/gsheetsotpcodecontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsservices.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 // Get data process
 Future<List<Map<String, String>>?> getDataEmployees() async {
@@ -250,32 +256,51 @@ Future<List<Map<String, String>>> getDataBarangLemari3() async {
 
 // Validation and Where
 Future<List<Map<String, dynamic>>> validationLogins() async {
-  if (GSheetsServicesEmployees.sheet == null) {
-    await GSheetsServicesEmployees.init();
-  }
+  try {
+    if (GSheetsServicesEmployees.sheet == null) {
+      await GSheetsServicesEmployees.init();
+    }
 
-  final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
+    final rows =
+    await GSheetsServicesEmployees.sheet!.values.map.allRows();
 
-  if (rows!.isEmpty) {
-    return [];
-  }
+    if (rows == null || rows.isEmpty) {
+      return [];
+    }
 
-  final usrnm = loginUserNameController.text.trim();
-  final usrpass = loginPasswordController.text.trim();
+    final usrnm = loginUserNameController.text.trim();
+    final usrpass = loginPasswordController.text.trim();
 
-  return rows.where((row) {
+    final resultsLogin = rows.where((row) {
+      final valueUsrNames = row['UserName']?.toString().trim() ?? '';
+      final valuesPass = row['Pass']?.toString().trim() ?? '';
 
-    final valueUsrNames = row['UserName']?.toString() ?? '';
-    final valuesPass = row['Pass']?.toString() ?? '';
+      return valueUsrNames == usrnm && valuesPass == usrpass;
+    }).toList();
 
-    if (valueUsrNames == usrnm || valuesPass == usrpass) {
+    if (resultsLogin.isEmpty) {
+      return [];
+    }
+
+    final user = resultsLogin.first;
+    final valuesNamaLengkap = user['FullName']?.toString().trim() ?? '';
+    final valuesStatus = user['StatusLogin']?.toString().trim() ?? '';
+    final valueRoles = user['Roles']?.toString().trim() ?? '';
+
+    otpFullNamesController.text = valuesNamaLengkap;
+
+    if (valuesStatus == '0') {
+      Get.to(() => const EmailOTPPages());
+
+    } else if (valuesStatus == '1') {
       Get.offAll(() => const NavigationMenuPages());
     }
 
-    return valueUsrNames.contains(usrnm) &&
-    valuesPass.contains(usrpass);
+    return resultsLogin;
 
-  }).toList();
+  } catch (e) {
+    return [];
+  }
 }
 
 // list lemari 1
@@ -387,37 +412,92 @@ Future<bool> validationEmail() async {
     if (GSheetsServicesEmployees.sheet == null) {
       await GSheetsServicesEmployees.init();
     }
-
     final rows =
     await GSheetsServicesEmployees.sheet!.values.map.allRows();
 
     if (rows == null || rows.isEmpty) {
       return true;
     }
-
     for (var verifyEmails in revampResgistControllerss) {
       final emailInput =
           verifyEmails["emailcontroller"]?.text.trim().toLowerCase() ?? '';
-
       if (emailInput.isEmpty) {
         return false;
       }
-
       final emailSudahAda = rows.any((row) {
-        final emailSheet =
-            row['Email']?.toString().trim().toLowerCase() ?? '';
-
+        final emailSheet = row['Email']?.toString().trim().toLowerCase() ?? '';
         return emailSheet == emailInput;
       });
-
       if (emailSudahAda) {
         return false;
       }
     }
-
     return true;
   } catch (e) {
     debugPrint('Error validation email: $e');
+    return false;
+  }
+}
+
+Future<bool> validationEmailAndUserNameFirstLogin() async {
+  try {
+    if (GSheetsServicesEmployees.sheet == null) {
+      await GSheetsServicesEmployees.init();
+    }
+    final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
+
+    if (rows!.isEmpty) {
+      return true;
+    }
+
+    final emailInput = emailcontroller.text.trim().toLowerCase();
+    final userNames = usernamecontroller.text.trim().toLowerCase();
+
+    if (emailInput.isEmpty) {
+      debugPrint("Email kosong.");
+      return false;
+    }
+
+    if (userNames.isEmpty) {
+      debugPrint("Username kosong.");
+      return false;
+    }
+
+    final emailandUserNameSudahAda = rows.any((row) {
+
+      final emailSheet = row['Email']?.toString().trim().toLowerCase() ?? '';
+      final usrNameSheet = row['UserName']?.toString().trim().toLowerCase() ?? '';
+
+      return emailSheet == emailInput && usrNameSheet == userNames;
+    });
+
+    if (emailandUserNameSudahAda) {
+
+      debugPrint(
+        "Email dan Username sudah terdaftar.",
+      );
+
+      debugPrint(
+        "Email   : $emailInput",
+      );
+
+      debugPrint(
+        "Username: $userNames",
+      );
+
+      return false;
+    }
+
+    await insertRegistrationFirstUser();
+
+    return true;
+
+  } catch (e) {
+
+    debugPrint(
+      'Error validation email: $e',
+    );
+
     return false;
   }
 }
@@ -474,6 +554,188 @@ Future<List<Map<String, String>>> getListDataBarangLemari3() async {
   }
 }
 
+String convertGoogleSheetsDate(dynamic value) {
+  try {
+    if (value == null) {
+      return '';
+    }
+
+    final text = value.toString().trim();
+
+    if (text.isEmpty) {
+      return '';
+    }
+
+    // Jika sudah dalam format yyyy-MM-dd
+    if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text)) {
+      return text;
+    }
+
+    // Jika bisa langsung dibaca sebagai DateTime
+    final parsedDate = DateTime.tryParse(text);
+
+    if (parsedDate != null) {
+      return DateFormat('yyyy-MM-dd').format(parsedDate);
+    }
+
+    // Jika Google Sheets memberikan serial number
+    final serial = double.tryParse(text);
+
+    if (serial == null) {
+      return text;
+    }
+
+    final date = DateTime(1899, 12, 30).add(
+      Duration(
+        days: serial.floor(),
+      ),
+    );
+
+    return DateFormat('yyyy-MM-dd').format(date);
+  } catch (e) {
+    print('Error convertGoogleSheetsDate: $e');
+    return '';
+  }
+}
+
+
+Future<List<Map<String, String>>> getListUsers() async {
+  final worksheet = GSheetsServicesEmployees.sheet;
+
+  if (worksheet == null) {
+    throw Exception('Sheet Employee belum diinisialisasi.');
+  }
+
+  try {
+    final rows = await worksheet.values.allRows();
+    if (rows.length < 2) {
+      return [];
+    }
+
+    final header = rows[0];
+
+    final employeeIDIndex = header.indexWhere((h) => h.toString().trim() == 'EmployeeID',);
+    final fullnameIndex = header.indexWhere((h) => h.toString().trim() == 'FullName',);
+    final userNameIndex = header.indexWhere((h) => h.toString().trim() == 'UserName',);
+    final tanggalLahirIndex = header.indexWhere((h) => h.toString().trim() == 'TanggalLahir',);
+    final alamatIndex = header.indexWhere((h) => h.toString().trim() == 'Alamat',);
+    final alamatEmailIndex = header.indexWhere((h) => h.toString().trim() == 'Email',);
+    final nomerTlpIndex = header.indexWhere((h) => h.toString().trim() == 'NomerTelpon',);
+    final posisiIndex = header.indexWhere((h) => h.toString().trim() == 'Posisi',);
+
+    if (employeeIDIndex == -1 || fullnameIndex == -1 || userNameIndex == -1 || tanggalLahirIndex == -1 ||
+        alamatIndex == -1 || alamatEmailIndex == -1 || nomerTlpIndex == -1 || posisiIndex == -1) {
+
+      throw Exception(
+        'Kolom EmployeeID, FullName, UserName, TanggalLahir, '
+            'Alamat, Email, NomerTelpon, atau Posisi tidak ditemukan.',
+      );
+    }
+
+    String getValue(List<dynamic> row, int index) {
+      if (index >= 0 && index < row.length) {
+        return row[index].toString().trim();
+      }
+      return "";
+    }
+
+    final result = rows.skip(1).map((row) {
+      final tanggalLahir = convertGoogleSheetsDate(
+        getValue(row, tanggalLahirIndex),
+      );
+
+      return {
+        "EmployeeID": getValue(row, employeeIDIndex),
+        "FullName": getValue(row, fullnameIndex),
+        "UserName": getValue(row, userNameIndex),
+        "TanggalLahir": tanggalLahir,
+        "Alamat": getValue(row, alamatIndex),
+        "Email": getValue(row, alamatEmailIndex),
+        "NomerTelpon": getValue(row, nomerTlpIndex),
+        "Posisi": getValue(row, posisiIndex),
+      };
+    }).where((user) {
+      return user["FullName"]!.isNotEmpty;
+    }).toList();
+
+    debugPrint("Jumlah user ditemukan: ${result.length}");
+    debugPrint("Data user: $result");
+
+    return result;
+  } catch (e) {
+    debugPrint("Error getListUsers: $e");
+    rethrow;
+  }
+}
+
+Future<List<Map<String, dynamic>>> getDataDashboardStok() async {
+  try {
+    if (GSheetsServicesEmployees.sheetsDashboard == null) {
+      await GSheetsServicesEmployees.init();
+    }
+
+    final worksheet = GSheetsServicesEmployees.sheetsDashboard;
+
+    if (worksheet == null) {
+      print('Worksheet Dashboard tidak ditemukan');
+      return [];
+    }
+    final rows = await worksheet.values.map.allRows();
+
+    if (rows == null || rows.isEmpty) {
+      print('Data Dashboard kosong');
+      return [];
+    }
+
+    final List<Map<String, dynamic>> result = [];
+
+    String currentLemari = '';
+
+    for (final row in rows) {
+      final nama = row['A']?.toString().trim() ?? '';
+
+
+      if (nama.isEmpty) {
+        continue;
+      }
+
+
+      if (nama.toLowerCase().contains('summary lemari')) {
+        currentLemari = nama;
+        continue;
+      }
+
+      if (currentLemari.isEmpty) {
+        continue;
+      }
+
+      // Abaikan header
+      if (nama.toLowerCase() == 'jumlah jenis barang' ||
+          nama.toLowerCase() == 'total stok awal' ||
+          nama.toLowerCase() == 'total barang masuk' ||
+          nama.toLowerCase() == 'total barang keluar' ||
+          nama.toLowerCase() == 'total stok saat ini' ||
+          nama.toLowerCase() == 'jumlah barang kurang') {
+
+        result.add({
+          'lemari': currentLemari,
+          'nama': nama,
+          'jumlah': row['B']?.toString() ?? '0',
+          'status': row['C']?.toString() ?? '',
+          'jumlahStatus': row['D']?.toString() ?? '0',
+        });
+      }
+    }
+
+    print('Data Dashboard: $result');
+
+    return result;
+  } catch (e) {
+    print('Error getDataDashboardStok: $e');
+    return [];
+  }
+}
+
 Future<List<Map<String, dynamic>>> headerPagesController() async {
   if (GSheetsServicesEmployees.sheet == null) {
     await GSheetsServicesEmployees.init();
@@ -489,7 +751,7 @@ Future<List<Map<String, dynamic>>> headerPagesController() async {
   final usrnm = loginUserNameController.text.trim();
   final usrpass = loginPasswordController.text.trim();
 
-  final result = rows!.where((row) {
+  final result = rows.where((row) {
 
     final valueUsrNames =
         row['UserName']?.toString() ?? '';
@@ -503,16 +765,219 @@ Future<List<Map<String, dynamic>>> headerPagesController() async {
   }).toList();
 
   if (result.isNotEmpty) {
-
     final user = result.first;
-    HomePagesUserNames.text = user['FullName']?.toString() ?? '';
+    HomePagesUserNames.text = user['NamaDepan']?.toString() ?? '';
     HomePagesPositions.text = user['Posisi']?.toString() ?? '';
   }
-
   return result;
 }
 
+Future<List<Map<String, dynamic>>> sideBarPagesController() async {
+  if (GSheetsServicesEmployees.sheet == null) {
+    await GSheetsServicesEmployees.init();
+  }
+
+  final rows =
+  await GSheetsServicesEmployees.sheet!.values.map.allRows();
+
+  if (rows!.isEmpty) {
+    return [];
+  }
+
+  final usrnm = loginUserNameController.text.trim();
+  final usrpass = loginPasswordController.text.trim();
+
+  final result = rows.where((row) {
+
+    final valueUsrNames =
+        row['UserName']?.toString() ?? '';
+
+    final valuesPass =
+        row['Pass']?.toString() ?? '';
+
+    return valueUsrNames.contains(usrnm) &&
+        valuesPass.contains(usrpass);
+
+  }).toList();
+
+  if (result.isNotEmpty) {
+    final user = result.first;
+    sideBarFullNameController.text = user['FullName']?.toString() ?? '';
+    sideBarJabatanController.text = user['Posisi']?.toString() ?? '';
+    sideBarPosisiController.text = user['Roles']?.toString() ?? '';
+    sideBarEmployeeIDController.text = user['EmployeeID']?.toString() ?? '';
+    sideBarUserNamesController.text = user['UserName']?.toString() ?? '';
+  }
+  return result;
+}
+
+Future<List<Map<String, dynamic>>> findOTPCodes() async {
+  try {
+    if (GSheetsServicesEmployees.sheetOTP == null) {
+      await GSheetsServicesEmployees.init();
+    }
+
+    final rows = await GSheetsServicesEmployees.sheetOTP!.values.map.allRows();
+
+    if (rows == null || rows.isEmpty) {
+      return [];
+    }
+
+    final emailsOTP = otpemailcontroller.text.trim();
+
+    if (emailsOTP.isEmpty) {
+      return [];
+    }
+
+    final result = rows.where((row) {
+      final valueEmailsOTP = row['EmailOTP']?.toString().trim() ?? '';
+      return valueEmailsOTP == emailsOTP;
+    }).toList();
+
+    if (result.isNotEmpty) {
+      final otp = result.first;
+
+      sendOTPControllers.text = otp['OTPCode']?.toString() ?? '';
+
+    } else {
+      sendOTPControllers.clear();
+    }
+
+    return result;
+  } catch (e) {
+    return [];
+  }
+}
+
+Future<List<Map<String, dynamic>>> validationOTP() async {
+  try {
+    if (GSheetsServicesEmployees.sheetOTP  == null) {
+      await GSheetsServicesEmployees.init();
+    }
+
+    final rows =
+    await GSheetsServicesEmployees.sheetOTP!.values.map.allRows();
+
+    if (rows == null || rows.isEmpty) {
+      return [];
+    }
+
+    final emailOTP = otpemailcontroller.text.trim();
+    final otpCodes = otpcontrollers.text.trim();
+
+    final results = rows.where((row) {
+
+      final valueEmailOTP = row['EmailOTP']?.toString().trim() ?? '';
+      final valuesOTPCodes = row['OTPCode']?.toString().trim() ?? '';
+
+      return valueEmailOTP == emailOTP && valuesOTPCodes == otpCodes;
+
+    }).toList();
+
+    if (results.isNotEmpty) {
+      Get.to(() => const ChangesPasswordPages());
+      await GsheetsOTPControllers().deleteOTPCodes();
+      otpcontrollers.clear();
+    }
+
+    return results;
+  } catch (e) {
+    return [];
+  }
+}
+
+Future<List<Map<String, dynamic>>> validationEmailOTP() async {
+  if (GSheetsServicesEmployees.sheet == null) {
+    await GSheetsServicesEmployees.init();
+  }
+
+  final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
+
+  if (rows!.isEmpty) {
+    return [];
+  }
+
+  final emailOTPs = otpemailcontroller.text.trim();
+
+  return rows.where((row) {
+
+    final valueEmails = row['Email']?.toString() ?? '';
+
+    if (valueEmails == emailOTPs) {
+      Get.to(() => const OtpVerificationsPages());
+    }
+    return valueEmails.contains(emailOTPs) ;
+
+  }).toList();
+}
 
 
+Future<bool> deleteUser() async {
+  try {
+    if (GSheetsServicesEmployees.sheet == null) {
+      await GSheetsServicesEmployees.init();
+    }
 
+    final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
 
+    if (rows == null || rows.isEmpty) {
+      return false;
+    }
+
+    final employeeId = sideBarEmployeeIDController.text.trim();
+    final username = sideBarUserNamesController.text.trim();
+
+    if (employeeId.isEmpty || username.isEmpty) {
+      return false;
+    }
+
+    final result = rows.where((row) {
+
+      final valueEmployeeId = row['EmployeeID']?.toString().trim() ?? '';
+      final valueUsername = row['Username']?.toString().trim() ?? '';
+      return valueEmployeeId == employeeId && valueUsername == username;
+
+    }).toList();
+
+    if (result.isEmpty) {
+      return false;
+    }
+
+    final user = result.first;
+    final employeeIdValue = user['EmployeeID']?.toString().trim() ?? '';
+    final usernameValue = user['UserName']?.toString().trim() ?? '';
+
+    final allRows =
+    await GSheetsServicesEmployees.sheet!.values.allRows();
+
+    if (allRows.isEmpty) {
+      return false;
+    }
+
+    int targetRow = -1;
+
+    for (int i = 0; i < allRows.length; i++) {
+      final row = allRows[i];
+      if (row.isEmpty) {
+        continue;
+      }
+
+      if (row.contains(employeeIdValue) &&
+          row.contains(usernameValue)) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+
+    if (targetRow == -1) {
+      return false;
+    }
+
+    await GSheetsServicesEmployees.sheet!.deleteRow(targetRow);
+
+    return true;
+  } catch (e) {
+    print('Error deleteUser: $e');
+    return false;
+  }
+}

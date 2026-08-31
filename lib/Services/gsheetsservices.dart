@@ -7,6 +7,8 @@ class GSheetsServicesEmployees {
   static Worksheet? sheet;
   static Worksheet? sheetPosisi;
   static Worksheet? sheetLemari;
+  static Worksheet? sheetLogin;
+  static Worksheet? sheetOTP;
   static Worksheet? sheetsLemari1;
   static Worksheet? sheetsLemari2;
   static Worksheet? sheetsLemari3;
@@ -33,6 +35,8 @@ class GSheetsServicesEmployees {
       final employeeSheet = spreadsheet.worksheetByTitle(GsheetsConfigs.workSheetsNames,);
       final posisiSheet = spreadsheet.worksheetByTitle(GsheetsConfigs.workSheetsNamesPosisi,);
       final posisiLemari = spreadsheet.worksheetByTitle(GsheetsConfigs.workSheetsNamesLemari,);
+      final loginsLog = spreadsheet.worksheetByTitle(GsheetsConfigs.workSheetsLogin,);
+      final otpCodes = spreadsheet.worksheetByTitle(GsheetsConfigs.workSheetsotp,);
 
       //LemariBasment
       final spreadsheetLemariBarang = await gsheets.spreadsheet(GsheetsConfigs.gsheetsIDDaftarLemari,);
@@ -47,6 +51,8 @@ class GSheetsServicesEmployees {
       sheet = employeeSheet;
       sheetPosisi = posisiSheet;
       sheetLemari = posisiLemari;
+      sheetLogin = loginsLog;
+      sheetOTP = otpCodes;
 
       sheetsLemari1 = sheetBarangLemari1;
       sheetsLemari2 = sheetBarangLemari2;

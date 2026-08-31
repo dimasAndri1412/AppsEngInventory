@@ -105,6 +105,9 @@ flutter:
       - lib/assets/images/Untitled-1.png
       - lib/assets/images/logo_Kemenlu.png
       - lib/assets/images/homepic.png
+      - lib/assets/images/Changes_Passwords.png
+      - lib/assets/images/forgot-account-password.png
+      - lib/assets/images/otp_verfication.png
       - lib/assets/Files/gsheetsproects-613d6eb9ccc1.json
 
   # The following line ensures that the Material Icons font is

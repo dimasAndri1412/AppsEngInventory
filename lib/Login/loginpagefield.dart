@@ -1,5 +1,7 @@
 import 'package:appsenginventory/Controller/key.dart';
+import 'package:appsenginventory/ForgotPassword/forgotpasswordpages.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class Loginpagefield extends StatefulWidget {
   const Loginpagefield({super.key});
@@ -115,7 +117,7 @@ class _LoginpagefieldState extends State<Loginpagefield> {
                     TextButton(
                       onPressed: () {
                         setState(() {
-
+                          Get.to(() => const ForgotPasswordPages());
                         });
                       },
                       child: const Text(''

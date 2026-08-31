@@ -22,17 +22,42 @@ class _LoginpagebuttonsState extends State<Loginpagebuttons> {
       children: <Widget>[
         GestureDetector (
           onTap: () async {
-            if (loginkeys.currentState!.validate()) {
-              await validationLogins();
-              const snackBar = SnackBar(
-                content: Text('Login Sucessfully!'),
+            if (!loginkeys.currentState!.validate()) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Login Gagal! Periksa Username dan Password.',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.red,
+                ),
               );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              return;
+            }
+            final results = await validationLogins();
+            if (results.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Username dan Password benar, Login Berhasil!',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.green,
+                ),
+              );
             } else {
-              const snackBar = SnackBar(
-                content: Text('Login Gagal!, Lakukan Kembali'),
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Username atau Password salah, Login Gagal!',
+                    style: TextStyle(
+                        color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.red,
+                ),
               );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
             }
           },
           child: Container(
