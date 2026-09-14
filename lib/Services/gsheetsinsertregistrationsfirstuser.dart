@@ -27,62 +27,12 @@ Future<bool> insertRegistrationFirstUser() async {
     final username = usernamecontroller.text.trim();
     final tanggalLahir = birthdatecontroller.text.trim();
     final alamat = addresscontroller.text.trim();
-    final nomerTelpon = phonenumberscontroller.text.trim();
     final email = emailcontroller.text.trim();
-    final posisi = positionscontrollers.text.trim();
+    final nomerTelpon = phonenumberscontroller.text.trim();
     final roles = rolesController.text.trim();
+    final posisi = positionscontrollers.text.trim();
     final password = passcontroller.text.trim();
     const statusLogin = '0';
-
-    if (employeeID.isEmpty) {
-      debugPrint("Employee ID kosong.");
-      return false;
-    }
-
-    if (fullName.isEmpty) {
-      debugPrint("Full Name kosong.");
-      return false;
-    }
-
-    if (username.isEmpty) {
-      debugPrint("Username kosong.");
-      return false;
-    }
-
-    if (tanggalLahir.isEmpty) {
-      debugPrint("Tanggal lahir kosong.");
-      return false;
-    }
-
-    if (alamat.isEmpty) {
-      debugPrint("Alamat kosong.");
-      return false;
-    }
-
-    if (nomerTelpon.isEmpty) {
-      debugPrint("Nomor telepon kosong.");
-      return false;
-    }
-
-    if (email.isEmpty) {
-      debugPrint("Email kosong.");
-      return false;
-    }
-
-    if (posisi.isEmpty) {
-      debugPrint("Posisi kosong.");
-      return false;
-    }
-
-    if (roles.isEmpty) {
-      debugPrint("Roles kosong.");
-      return false;
-    }
-
-    if (password.isEmpty) {
-      debugPrint("Password kosong.");
-      return false;
-    }
 
     String formattedBirthDate = tanggalLahir;
 
@@ -110,9 +60,6 @@ Future<bool> insertRegistrationFirstUser() async {
       }
 
       else {
-        debugPrint("Format tanggal tidak dikenali: $tanggalLahir",
-        );
-
         return false;
       }
       formattedBirthDate = DateFormat("yyyy-MM-dd").format(date);
@@ -124,18 +71,12 @@ Future<bool> insertRegistrationFirstUser() async {
     final rows = await worksheet.values.allRows();
 
     if (rows.isEmpty) {
-      debugPrint(
-        "Data Google Sheets kosong.",
-      );
       return false;
     }
 
     final headerIndex = rows.indexWhere((row) => row.any((cell) => cell.toString().trim() == "EmployeeID",),);
 
     if (headerIndex == -1) {
-      debugPrint(
-        "Header EmployeeID tidak ditemukan.",
-      );
       return false;
     }
 
@@ -145,17 +86,13 @@ Future<bool> insertRegistrationFirstUser() async {
     final emailIndex = header.indexWhere((cell) => cell.toString().trim().toLowerCase() == "email",);
 
     if (employeeIDIndex == -1) {
-      debugPrint(
-        "Column EmployeeID tidak ditemukan.",
-      );
       return false;
     }
 
     for (final row in rows.skip(headerIndex + 1)) {
       final existingEmployeeID =
       employeeIDIndex >= 0 &&
-          row.length >
-              employeeIDIndex
+          row.length > employeeIDIndex
           ? row[employeeIDIndex]
           .toString()
           .trim()
@@ -180,28 +117,15 @@ Future<bool> insertRegistrationFirstUser() async {
           : "";
 
       if (existingEmployeeID == employeeID) {
-        debugPrint(
-          "Employee ID sudah digunakan: "
-              "$employeeID",
-        );
         return false;
       }
 
       if (existingUsername.toLowerCase() == username.toLowerCase()) {
-        debugPrint(
-          "Username sudah digunakan: "
-              "$username",
-        );
         return false;
       }
 
 
       if (existingEmail.toLowerCase() == email.toLowerCase()) {
-        debugPrint(
-          "Email sudah digunakan: "
-              "$email",
-        );
-
         return false;
       }
     }
@@ -214,10 +138,10 @@ Future<bool> insertRegistrationFirstUser() async {
       username,
       formattedBirthDate,
       alamat,
-      nomerTelpon,
       email,
-      posisi,
+      nomerTelpon,
       roles,
+      posisi,
       password,
       statusLogin,
     ];

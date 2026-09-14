@@ -64,20 +64,20 @@ class _RevampRegistrationsPagesState extends State<RevampRegistrationsPages> {
             icon: const Icon(Icons.warning_amber,
                 color: Colors.deepOrange),
             title: const Text(
-              "Attentions!",
+              "PERHATIAN!",
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            content: const Text("ARE YOU SURE WANT TO EXIT WITHOUT SAVE"),
+            content: const Text("APAKAH KAMU YAKIN INGIN KELUAR?"),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Get.back();
                 },
-                child: const Text("NO",style:
+                child: const Text("TIDAK",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),
@@ -86,7 +86,7 @@ class _RevampRegistrationsPagesState extends State<RevampRegistrationsPages> {
                 Get.back();
                 Get.back();
               },
-                child: const Text("YES",style:
+                child: const Text("YA!",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),

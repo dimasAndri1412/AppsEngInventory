@@ -4,39 +4,53 @@ import 'package:appsenginventory/ChangesPersonalSettings/changespersonalsettingw
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Controller/clearfunc.dart';
+
 class ChangesPersonalSettingPages extends StatefulWidget {
   const ChangesPersonalSettingPages({super.key});
 
   @override
-  State<ChangesPersonalSettingPages> createState() => _ChangesPersonalSettingPagesState();
+  State<ChangesPersonalSettingPages> createState() =>
+      _ChangesPersonalSettingPagesState();
 }
 
-class _ChangesPersonalSettingPagesState extends State<ChangesPersonalSettingPages> {
+class _ChangesPersonalSettingPagesState
+    extends State<ChangesPersonalSettingPages> {
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        bool shouldNavigateBack = (await _showConfirmDialog(context)) as bool;
-        return shouldNavigateBack;
+        final shouldNavigateBack = await _showConfirmDialog(context);
+        return shouldNavigateBack ?? false;
       },
+
       child: Scaffold(
         appBar: AppBar(
-          title: const Text (
+          title: const Text(
             "PERUBAHAN PASSWORD",
             style: TextStyle(
-                color: Colors.white,
-                fontSize: 22,
-                fontWeight: FontWeight.bold
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
             ),
           ),
           leading: IconButton(
-            onPressed: () {
-              _showConfirmDialog(context);
+            onPressed: () async {
+              await _showConfirmDialog(context);
             },
-            icon: const Icon(Icons.arrow_back_ios,color: Colors.white,),
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: Colors.white,
+            ),
           ),
-          backgroundColor: const Color.fromARGB(255, 8, 36, 87),
-          iconTheme: const IconThemeData(color: Colors.white),
+          backgroundColor: const Color.fromARGB(
+            255, 8, 36, 87,
+          ),
+
+          iconTheme: const IconThemeData(
+            color: Colors.white,
+          ),
         ),
         body: Container(
           width: double.infinity,
@@ -52,84 +66,110 @@ class _ChangesPersonalSettingPagesState extends State<ChangesPersonalSettingPage
               ],
             ),
           ),
-          child: Transform.translate(
-            offset: const Offset(0, -15),
-            child: Column(
-              children: [
-                const SizedBox(height: 30),
-                const ChangesPersonalSettingHeaders(),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(20),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.only(
+                bottom: 25,
+              ),
+              child: Transform.translate(
+                offset: const Offset(0, -15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+
+                    const SizedBox(height: 30),
+                    const ChangesPersonalSettingHeaders(),
+                    const SizedBox(height: 10),
+
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 15,
-                          offset: Offset(2, 10),
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(20),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 15,
+                              offset: Offset(2, 10),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: const ChangesPersonalSettingWrappers(),
+                      ),
                     ),
-                    child: const SingleChildScrollView(
-                      child: ChangesPersonalSettingWrappers(),
-                    ),
-                  ),
+                    const SizedBox(height: 25),
+                    const ChangesPersonalSettingButtons(),
+                    const SizedBox(height: 10),
+                  ],
                 ),
-                const SizedBox(height: 25),
-                const ChangesPersonalSettingButtons(),
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
-  Future<Future<bool?>> _showConfirmDialog(BuildContext context) async {
+
+  Future<bool?> _showConfirmDialog(BuildContext context) async {
     return showDialog<bool>(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            icon: const Icon(Icons.warning_amber,
-                color: Colors.deepOrange),
-            title: const Text(
-              "Attentions!",
-              style: TextStyle(
-                color: Colors.blue,
-                fontSize: 25,
-                fontWeight: FontWeight.bold,
-              ),
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          icon: const Icon(
+            Icons.warning_amber,
+            color: Colors.deepOrange,
+          ),
+          title: const Text(
+            "Attentions!",
+            style: TextStyle(
+              color: Colors.blue,
+              fontSize: 25,
+              fontWeight: FontWeight.bold,
             ),
-            content: const Text("ARE YOU SURE WANT TO EXIT WITHOUT SAVE"),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Get.back();
-                },
-                child: const Text("NO",style:
-                TextStyle(color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold),
-                ),
-              ),
-              TextButton(onPressed: (){
+          ),
+          content: const Text(
+            "APAKAH KAMU YAKIN INGIN KELUAR?",
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
                 Get.back();
-                //ctr_data().clear_func();
+                //ClearControllerFunc.clearControllers();
                 Get.back();
               },
-                child: const Text("YES",style:
-                TextStyle(color: Colors.blueAccent,
-                    fontWeight: FontWeight.bold),
+              child: const Text(
+                "TIDAK",
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ],
-          );
-        }
+            ),
+            TextButton(
+              onPressed: () {
+                Get.back();
+                ClearControllerFunc.clearControllers();
+                Get.back();
+              },
+              child: const Text(
+                "YA!",
+                style: TextStyle(
+                  color: Colors.blueAccent,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

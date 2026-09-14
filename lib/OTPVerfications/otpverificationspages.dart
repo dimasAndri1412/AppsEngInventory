@@ -1,5 +1,8 @@
+import 'package:appsenginventory/Controller/clearfunc.dart';
+import 'package:appsenginventory/OTPVerfications/EmailOtpForgotPassword/emailforgotpages.dart';
 import 'package:appsenginventory/OTPVerfications/otpverficationsfields.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class OtpVerificationsPages extends StatefulWidget {
   const OtpVerificationsPages({super.key});
@@ -51,28 +54,29 @@ class _OtpVerificationsPagesState extends State<OtpVerificationsPages> {
             icon: const Icon(Icons.warning_amber,
                 color: Colors.deepOrange),
             title: const Text(
-              "Attentions!",
+              "PERHATIAN!",
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            content: const Text("ARE YOU SURE WANT TO EXIT"),
+            content: const Text("APAKAH KAMU YAKIN INGIN KELUAR"),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(false);
                 },
-                child: const Text("NO", style:
+                child: const Text("TIDAK", style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),
               ),
               TextButton(onPressed: () {
-
+                Get.offAll(() => const EmailOTPForgotPages());
+                ClearControllerFunc.clearControllers();
               },
-                child: const Text("YES", style:
+                child: const Text("YA!", style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),

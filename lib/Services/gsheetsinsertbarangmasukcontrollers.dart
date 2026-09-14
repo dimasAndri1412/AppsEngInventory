@@ -4,7 +4,6 @@ import 'gsheetsservices.dart';
 
 class GsheetsInsertBarangMasuk {
 
-  String? revampNomerUrutBarangMasuk;
   String? revampKodeBarangMasuk;
   String? revampTanggalBarangMasuk;
   String? revampNamaBarangMasuk;
@@ -32,7 +31,6 @@ class GsheetsInsertBarangMasuk {
     GSheetsServicesEmployees.sheetsBarangMasuk!;
 
     final List<String> row = [
-      revampNomerUrutBarangMasuk?.trim() ?? '',
       revampTanggalBarangMasuk?.trim() ?? '',
       revampKodeBarangMasuk?.trim() ?? '',
       revampNamaBarangMasuk?.trim() ?? '',

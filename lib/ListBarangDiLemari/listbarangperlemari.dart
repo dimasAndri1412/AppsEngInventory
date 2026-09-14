@@ -1,11 +1,11 @@
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:appsenginventory/ListBarangDiLemari/detailbarangperlemari.dart';
-import 'package:appsenginventory/MenuPages/navigationmenu.dart';
 import 'package:appsenginventory/RevampBarangMasuk/revampbarangmasukpages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../Services/gsheetscontrollers.dart';
+import '../Services/gsheetsdeletebarang.dart';
 
 class Listbarangperlemari extends StatefulWidget {
   const Listbarangperlemari({super.key});
@@ -17,7 +17,9 @@ class Listbarangperlemari extends StatefulWidget {
 class _ListbarangperlemariState extends State<Listbarangperlemari> {
   List<Map<String, String>> allBarang = [];
   List<Map<String, String>> filteredBarang = [];
+
   String selectedLemari = "Lemari1";
+
   final List<String> daftarLemari = [
     "Lemari1",
     "Lemari2",
@@ -25,6 +27,7 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
   ];
 
   bool isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -32,27 +35,51 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
   }
 
   Future<void> loadBarang() async {
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
 
     List<Map<String, String>> data = [];
 
-    switch (selectedLemari) {
-      case "Lemari1":
-        data = await getListDataBarangLemari1();
-        break;
-      case "Lemari2":
-        data = await getListDataBarangLemari2();
-        break;
-      case "Lemari3":
-        data = await getListDataBarangLemari3();
-        break;
-    }
+    try {
+      switch (selectedLemari) {
+        case "Lemari1":
+          data = await getListDataBarangLemari1();
+          break;
 
-    setState(() {
-      allBarang = data;
-      filteredBarang = data;
-      isLoading = false;
-    });
+        case "Lemari2":
+          data = await getListDataBarangLemari2();
+          break;
+
+        case "Lemari3":
+          data = await getListDataBarangLemari3();
+          break;
+      }
+
+      if (!mounted) return;
+
+      setState(() {
+        allBarang = data;
+        filteredBarang = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        allBarang = [];
+        filteredBarang = [];
+        isLoading = false;
+      });
+
+      Get.snackbar(
+        "Error",
+        "Gagal mengambil data barang: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
   void filterBarang(String value) {
@@ -72,13 +99,252 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
     });
   }
 
+  // ============================================================
+  // KONFIRMASI DELETE BARANG
+  // ============================================================
+
+  Future<void> confirmDeleteBarang(
+      Map<String, String> barang,
+      ) async {
+    final String kodeBarang =
+        barang["Kode Barang"]?.trim() ?? "";
+
+    final String namaBarang =
+        barang["Nama Barang"]?.trim() ?? "";
+
+    final String lemari =
+    selectedLemari.trim();
+
+    if (kodeBarang.isEmpty) {
+      Get.snackbar(
+        "Gagal",
+        "Kode barang tidak ditemukan.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+      return;
+    }
+
+    final bool? konfirmasi = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.orange,
+            ),
+            SizedBox(width: 10),
+            Text("Hapus Barang"),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Apakah Anda yakin ingin menghapus barang ini?",
+              style: TextStyle(
+                fontSize: 15,
+              ),
+            ),
+
+            const SizedBox(height: 15),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    namaBarang,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+
+                  const SizedBox(height: 5),
+
+                  Text(
+                    "Kode: $kodeBarang",
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 13,
+                    ),
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    "Lokasi: $lemari",
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              "Data yang dihapus tidak dapat dikembalikan.",
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(result: false);
+            },
+            child: const Text(
+              "BATAL",
+              style: TextStyle(
+                color: Colors.grey,
+              ),
+            ),
+          ),
+
+          ElevatedButton.icon(
+            onPressed: () {
+              Get.back(result: true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            icon: const Icon(
+              Icons.delete,
+              size: 18,
+            ),
+            label: const Text("HAPUS"),
+          ),
+        ],
+      ),
+    );
+
+    if (konfirmasi != true) {
+      return;
+    }
+
+    await deleteBarang(
+      kodeBarang: kodeBarang,
+      lemari: lemari,
+    );
+  }
+
+  // ============================================================
+  // DELETE BARANG
+  // ============================================================
+
+  Future<void> deleteBarang({
+    required String kodeBarang,
+    required String lemari,
+  }) async {
+    // Tampilkan loading kecil
+    Get.dialog(
+      const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 15),
+                Text(
+                  "Menghapus barang...",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final bool berhasil =
+      await deleteBarangBerdasarkanKodeDanLemari(
+        kodeBarang: kodeBarang,
+        lemari: lemari,
+      );
+
+      // Tutup loading
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+
+      if (berhasil) {
+        Get.snackbar(
+          "Berhasil",
+          "Barang $kodeBarang berhasil dihapus dari $lemari.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+          duration: const Duration(seconds: 2),
+        );
+
+        // Refresh daftar barang
+        await loadBarang();
+      } else {
+        Get.snackbar(
+          "Gagal",
+          "Barang dengan kode $kodeBarang tidak ditemukan.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      // Tutup loading jika masih terbuka
+      if (Get.isDialogOpen == true) {
+        Get.back();
+      }
+
+      Get.snackbar(
+        "Error",
+        "Terjadi kesalahan saat menghapus barang: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF4F6FA),
+
       body: SafeArea(
         child: Column(
           children: [
+            // ====================================================
+            // HEADER
+            // ====================================================
+
             Stack(
               children: [
                 Container(
@@ -96,6 +362,7 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                     ),
                   ),
                 ),
+
                 const Positioned(
                   top: 15,
                   left: 20,
@@ -111,6 +378,7 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                     ),
                   ),
                 ),
+
                 Positioned(
                   bottom: 10,
                   left: 20,
@@ -124,27 +392,33 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                     child: TextField(
                       controller: searchController,
                       onChanged: filterBarang,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: "Cari barang atau kode...",
                         border: InputBorder.none,
-                        prefixIcon: IconButton(
-                          onPressed: () {
-                            Get.off(() => const NavigationMenuPages());
-                          },
-                          icon: const Icon(Icons.arrow_back_ios_new),
+                        suffixIcon:  Icon(
+                          Icons.search,
                         ),
-                        suffixIcon: const Icon(Icons.search),
                       ),
                     ),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 10),
+
+            // ====================================================
+            // DROPDOWN LEMARI
+            // ====================================================
+
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 15),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 15,
+                ),
                 decoration: BoxDecoration(
                   color: const Color(0xff2457A6),
                   borderRadius: BorderRadius.circular(15),
@@ -160,11 +434,14 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                   child: DropdownButton<String>(
                     value: selectedLemari,
                     isExpanded: true,
+
                     icon: const Icon(
                       Icons.keyboard_arrow_down,
                       color: Colors.white,
                     ),
-                    selectedItemBuilder: (BuildContext context) {
+
+                    selectedItemBuilder:
+                        (BuildContext context) {
                       return daftarLemari.map((lemari) {
                         return Row(
                           children: [
@@ -172,7 +449,9 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                               Icons.warehouse,
                               color: Colors.white,
                             ),
+
                             const SizedBox(width: 10),
+
                             Text(
                               lemari,
                               style: const TextStyle(
@@ -185,6 +464,7 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                         );
                       }).toList();
                     },
+
                     items: daftarLemari.map((lemari) {
                       return DropdownMenuItem<String>(
                         value: lemari,
@@ -194,7 +474,9 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                               Icons.warehouse,
                               color: Colors.black,
                             ),
+
                             const SizedBox(width: 10),
+
                             Text(
                               lemari,
                               style: const TextStyle(
@@ -206,18 +488,27 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                         ),
                       );
                     }).toList(),
+
                     onChanged: (value) async {
                       if (value == null) return;
+
                       setState(() {
                         selectedLemari = value;
                       });
+
                       await loadBarang();
                     },
                   ),
                 ),
               ),
             ),
+
             const SizedBox(height: 10),
+
+            // ====================================================
+            // LIST BARANG
+            // ====================================================
+
             Expanded(
               child: isLoading
                   ? const Center(
@@ -227,42 +518,72 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                   ? const Center(
                 child: Text(
                   "Data barang tidak ditemukan",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
                 ),
               )
                   : ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+                padding:
+                const EdgeInsets.symmetric(
+                  horizontal: 12,
+                ),
                 itemCount: filteredBarang.length,
-                itemBuilder: (context, index) {
-                  final barang = filteredBarang[index];
+                itemBuilder:
+                    (context, index) {
+                  final barang =
+                  filteredBarang[index];
 
                   return InkWell(
-                    borderRadius: BorderRadius.circular(15),
+                    borderRadius:
+                    BorderRadius.circular(15),
+
                     onTap: () {
                       Get.to(
-                            () => DetailBarang(barang: barang),
+                            () => DetailBarang(
+                          barang: barang,
+                        ),
                       );
                     },
+
                     child: Card(
                       elevation: 2,
                       margin:
-                      const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(15),
+                      const EdgeInsets.only(
+                        bottom: 12,
                       ),
+                      shape:
+                      RoundedRectangleBorder(
+                        borderRadius:
+                        BorderRadius.circular(
+                          15,
+                        ),
+                      ),
+
                       child: Padding(
                         padding:
-                        const EdgeInsets.all(12),
+                        const EdgeInsets.all(
+                          12,
+                        ),
+
                         child: Row(
                           children: [
+                            // ==================================
+                            // ICON BARANG
+                            // ==================================
+
                             Container(
                               width: 55,
                               height: 55,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade200,
+                              decoration:
+                              BoxDecoration(
+                                color: Colors
+                                    .grey.shade200,
                                 borderRadius:
-                                BorderRadius.circular(10),
+                                BorderRadius
+                                    .circular(
+                                  10,
+                                ),
                               ),
                               child: const Icon(
                                 Icons.inventory_2,
@@ -270,62 +591,148 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
                                 color: Colors.grey,
                               ),
                             ),
-                            const SizedBox(width: 12),
+
+                            const SizedBox(
+                              width: 12,
+                            ),
+
+                            // ==================================
+                            // INFORMASI BARANG
+                            // ==================================
+
                             Expanded(
                               child: Column(
                                 crossAxisAlignment:
-                                CrossAxisAlignment.start,
+                                CrossAxisAlignment
+                                    .start,
                                 children: [
+                                  Row(
+                                    children: [
+                                      // NAMA BARANG
+                                      Expanded(
+                                        child: Text(
+                                          barang[
+                                          "Nama Barang"] ??
+                                              "",
+                                          maxLines: 2,
+                                          overflow:
+                                          TextOverflow
+                                              .ellipsis,
+                                          style:
+                                          const TextStyle(
+                                            fontWeight:
+                                            FontWeight
+                                                .bold,
+                                            fontSize:
+                                            15,
+                                          ),
+                                        ),
+                                      ),
 
-                                  Text(
-                                    barang["Nama Barang"] ?? "",
-                                    style:
-                                    const TextStyle(
-                                      fontWeight:
-                                      FontWeight.bold,
-                                      fontSize: 15,
-                                    ),
+                                      const SizedBox(
+                                        width: 5,
+                                      ),
+
+                                      // ==================================
+                                      // TOMBOL TONG SAMPAH
+                                      // ==================================
+
+                                      IconButton(
+                                        tooltip:
+                                        "Hapus barang",
+                                        padding:
+                                        EdgeInsets
+                                            .zero,
+                                        constraints:
+                                        const BoxConstraints(
+                                          minWidth: 40,
+                                          minHeight:
+                                          40,
+                                        ),
+                                        onPressed: () {
+                                          confirmDeleteBarang(
+                                            barang,
+                                          );
+                                        },
+                                        icon:
+                                        const Icon(
+                                          Icons
+                                              .delete_outline,
+                                          color:
+                                          Colors.red,
+                                          size: 25,
+                                        ),
+                                      ),
+                                    ],
                                   ),
 
-                                  const SizedBox(height: 3),
+                                  const SizedBox(
+                                    height: 3,
+                                  ),
 
                                   Text(
-                                    barang["Kode Barang"] ?? "",
+                                    barang[
+                                    "Kode Barang"] ??
+                                        "",
                                     style: TextStyle(
-                                      color: Colors.grey.shade600,
+                                      color: Colors
+                                          .grey
+                                          .shade600,
                                       fontSize: 12,
                                     ),
                                   ),
-                                  const SizedBox(height: 8),
+
+                                  const SizedBox(
+                                    height: 8,
+                                  ),
+
                                   Text(
                                     "Stok: ${barang["Stok Akhir"]} ${barang["Satuan"]}",
                                     style:
                                     const TextStyle(
-                                      color: Colors.green,
+                                      color:
+                                      Colors.green,
                                       fontWeight:
-                                      FontWeight.bold,
+                                      FontWeight
+                                          .bold,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
+
+                            const SizedBox(
+                              width: 8,
+                            ),
+
+                            // ==================================
+                            // LOKASI LEMARI
+                            // ==================================
+
                             Container(
                               padding:
-                              const EdgeInsets.symmetric(
+                              const EdgeInsets
+                                  .symmetric(
                                 horizontal: 12,
                                 vertical: 6,
                               ),
-                              decoration: BoxDecoration(
-                                color:
-                                Colors.blue.shade50,
+                              decoration:
+                              BoxDecoration(
+                                color: Colors
+                                    .blue.shade50,
                                 borderRadius:
-                                BorderRadius.circular(
-                                    20),
+                                BorderRadius
+                                    .circular(
+                                  20,
+                                ),
                               ),
                               child: Text(
-                                barang["Lokasi"] ?? selectedLemari,
+                                barang["Lokasi"] ??
+                                    selectedLemari,
                                 style: TextStyle(
-                                  color: Colors.blue.shade700,
+                                  color: Colors
+                                      .blue
+                                      .shade700,
                                   fontSize: 12,
                                   fontWeight:
                                   FontWeight.w600,
@@ -344,11 +751,20 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
+      // ==========================================================
+      // FLOATING ACTION BUTTON
+      // ==========================================================
+
+      floatingActionButton:
+      FloatingActionButton(
         backgroundColor: const Color(0xff2457A6),
+
         onPressed: () {
-          Get.to(() => const RevampBarangMasukPages());
+          Get.to(
+                () => const RevampBarangMasukPages(),
+          );
         },
+
         child: const Icon(
           Icons.add,
           color: Colors.white,

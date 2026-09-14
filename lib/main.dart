@@ -3,9 +3,15 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'Services/notifikasicontroller.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('id_ID', null);
+  Get.put(
+    NotificationController(),
+    permanent: true,
+  );
   runApp(const MyApp());
 }
 

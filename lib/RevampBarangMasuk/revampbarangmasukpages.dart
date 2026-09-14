@@ -64,7 +64,7 @@ class _RevampBarangMasukPagesState extends State<RevampBarangMasukPages> {
             icon: const Icon(Icons.warning_amber,
                 color: Colors.deepOrange),
             title: const Text(
-              "Attentions!",
+              "PERHATIAN!",
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 25,
@@ -77,7 +77,7 @@ class _RevampBarangMasukPagesState extends State<RevampBarangMasukPages> {
                 onPressed: () {
                   Get.back();
                 },
-                child: const Text("NO",style:
+                child: const Text("TIDAK",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),
@@ -86,7 +86,7 @@ class _RevampBarangMasukPagesState extends State<RevampBarangMasukPages> {
                 Get.back();
                 Get.back();
               },
-                child: const Text("YES",style:
+                child: const Text("YA!",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),

@@ -16,9 +16,9 @@ Future<bool> updateForgotPassword() async {
       return false;
     }
 
-    final email = changesPasswordEmail.text.trim().toLowerCase();
-    final username = changesPasswordUserName.text.trim().toLowerCase();
-    final newPassword = changesPasswordNewPassword.text.trim();
+    final email = forgotPasswordEmail.text.trim().toLowerCase();
+    final username = forgotPasswordUserName.text.trim().toLowerCase();
+    final newPassword = forgotPasswordNewPassword.text.trim();
 
 
     if (email.isEmpty || username.isEmpty || newPassword.isEmpty) {

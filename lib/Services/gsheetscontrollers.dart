@@ -1,14 +1,21 @@
 import 'package:appsenginventory/ChangesPassword/changespasswordpages.dart';
+import 'package:appsenginventory/Controller/clearfunc.dart';
 import 'package:appsenginventory/Controller/key.dart';
+import 'package:appsenginventory/ForgotPassword/forgotpasswordpages.dart';
 import 'package:appsenginventory/MenuPages/navigationmenu.dart';
+import 'package:appsenginventory/OTPFeryvicationForgots/otpverficationsforgotpages.dart';
 import 'package:appsenginventory/OTPVerfications/EmailOTP/emailotppages.dart';
 import 'package:appsenginventory/OTPVerfications/otpverificationspages.dart';
+import 'package:appsenginventory/Registrations/registrationsmenu.dart';
+import 'package:appsenginventory/Services/gsheetsinsertlogincontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsinsertregistrationsfirstuser.dart';
 import 'package:appsenginventory/Services/gsheetsotpcodecontrollers.dart';
 import 'package:appsenginventory/Services/gsheetsservices.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+
+import '../HomePages/homepagesmenus.dart';
 
 // Get data process
 Future<List<Map<String, String>>?> getDataEmployees() async {
@@ -33,13 +40,7 @@ Future<List<Map<String, String>>> getDataPosisi() async {
   try {
     final rows = await worksheet.values.map.allRows();
 
-    debugPrint('======================================');
-    debugPrint('DATA POSISI DARI GOOGLE SHEETS');
-    debugPrint('$rows');
-    debugPrint('Jumlah data: ${rows!.length}');
-    debugPrint('======================================');
-
-    if (rows.isEmpty) {
+    if (rows!.isEmpty) {
       return [];
     }
 
@@ -72,13 +73,7 @@ Future<List<Map<String, String>>> getDataLemari() async {
   try {
     final rows = await worksheet.values.map.allRows();
 
-    debugPrint('======================================');
-    debugPrint('DATA POSISI DARI GOOGLE SHEETS');
-    debugPrint('$rows');
-    debugPrint('Jumlah data: ${rows!.length}');
-    debugPrint('======================================');
-
-    if (rows.isEmpty) {
+    if (rows!.isEmpty) {
       return [];
     }
 
@@ -293,7 +288,8 @@ Future<List<Map<String, dynamic>>> validationLogins() async {
       Get.to(() => const EmailOTPPages());
 
     } else if (valuesStatus == '1') {
-      Get.offAll(() => const NavigationMenuPages());
+      Get.to(() => const NavigationMenuPages());
+      await GsheetsInsertloginControllers().revampInsertLoginLogControllers();
     }
 
     return resultsLogin;
@@ -454,12 +450,9 @@ Future<bool> validationEmailAndUserNameFirstLogin() async {
     final userNames = usernamecontroller.text.trim().toLowerCase();
 
     if (emailInput.isEmpty) {
-      debugPrint("Email kosong.");
       return false;
     }
-
     if (userNames.isEmpty) {
-      debugPrint("Username kosong.");
       return false;
     }
 
@@ -467,28 +460,15 @@ Future<bool> validationEmailAndUserNameFirstLogin() async {
 
       final emailSheet = row['Email']?.toString().trim().toLowerCase() ?? '';
       final usrNameSheet = row['UserName']?.toString().trim().toLowerCase() ?? '';
-
       return emailSheet == emailInput && usrNameSheet == userNames;
     });
 
     if (emailandUserNameSudahAda) {
-
-      debugPrint(
-        "Email dan Username sudah terdaftar.",
-      );
-
-      debugPrint(
-        "Email   : $emailInput",
-      );
-
-      debugPrint(
-        "Username: $userNames",
-      );
-
       return false;
     }
-
     await insertRegistrationFirstUser();
+    await Get.off(() => const Homepagesmenus());
+    ClearControllerFunc.clearControllers();
 
     return true;
 
@@ -554,33 +534,160 @@ Future<List<Map<String, String>>> getListDataBarangLemari3() async {
   }
 }
 
+Future<List<Map<String, String>>> getListDataBarangMasuk() async {
+  final worksheet = GSheetsServicesEmployees.sheetsBarangMasuk;
+
+  if (worksheet == null) {
+    throw Exception('sheetBarangMasuk belum diinisialisasi.');
+  }
+
+  try {
+    final rows = await worksheet.values.allRows();
+
+    if (rows.length < 3) {
+      return [];
+    }
+
+    final header = rows[2];
+    final tanggalBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Tanggal');
+    final namaBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Nama Barang');
+    final kodeBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Kode Barang');
+    final jumlahBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Jumlah');
+    final satuanIndex = header.indexWhere((h) => h.toString().trim() == 'Satuan');
+    final posisiLemariIndex = header.indexWhere((h) => h.toString().trim() == 'Posisi Lemari');
+
+    if (tanggalBarangIndex == -1 || namaBarangIndex == -1 || kodeBarangIndex == -1 ||
+        jumlahBarangIndex == -1 || satuanIndex == -1 || posisiLemariIndex == -1) {
+      throw Exception(
+        "Kolom yang diperlukan tidak ditemukan.",
+      );
+    }
+
+    final result = rows.skip(3).map((row) {
+
+      final tanggal = row.length > tanggalBarangIndex
+          ? convertGoogleSheetsDate(row[tanggalBarangIndex])
+          : '';
+      final namaBarang = row.length > namaBarangIndex
+          ? row[namaBarangIndex].trim()
+          : '';
+      final kodeBarang = row.length > kodeBarangIndex
+          ? row[kodeBarangIndex].trim()
+          : '';
+      final jumlahBarang = row.length > jumlahBarangIndex
+          ? row[jumlahBarangIndex].trim()
+          : '';
+      final satuan = row.length > satuanIndex
+          ? row[satuanIndex].trim()
+          : '';
+      final posisiLemari = row.length > posisiLemariIndex
+          ? row[posisiLemariIndex].trim()
+          : '';
+
+      return {
+        "Tanggal": tanggal,
+        "Nama Barang": namaBarang,
+        "Kode Barang": kodeBarang,
+        "Jumlah": jumlahBarang,
+        "Satuan": satuan,
+        "Posisi Lemari": posisiLemari,
+      };
+    }).where((e) => e["Nama Barang"]!.isNotEmpty).toList();
+    return result;
+
+  } catch (e) {
+    debugPrint("Error getListDataBarangMasuk: $e");
+    rethrow;
+  }
+}
+
+Future<List<Map<String, String>>> getListDataBarangKeluar() async {
+
+  final worksheet = GSheetsServicesEmployees.sheetsBarangKeluar;
+  if (worksheet == null) {
+    throw Exception('sheetBarangMasuk belum diinisialisasi.');
+  }
+
+  try {
+    final rows = await worksheet.values.allRows();
+
+    if (rows.length < 3) {
+      return [];
+    }
+
+    final header = rows[2];
+    final tanggalBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Tanggal');
+    final namaBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Nama Barang');
+    final kodeBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Kode Barang');
+    final jumlahBarangIndex = header.indexWhere((h) => h.toString().trim() == 'Jumlah');
+    final satuanIndex = header.indexWhere((h) => h.toString().trim() == 'Satuan');
+    final posisiLemariIndex = header.indexWhere((h) => h.toString().trim() == 'Posisi Lemari');
+
+    if (tanggalBarangIndex == -1 || namaBarangIndex == -1 || kodeBarangIndex == -1 ||
+        jumlahBarangIndex == -1 || satuanIndex == -1 || posisiLemariIndex == -1) {
+      throw Exception(
+        "Kolom yang diperlukan tidak ditemukan.",
+      );
+    }
+
+    final result = rows.skip(3).map((row) {
+
+      final tanggal = row.length > tanggalBarangIndex
+          ? convertGoogleSheetsDate(row[tanggalBarangIndex])
+          : '';
+      final namaBarang = row.length > namaBarangIndex
+          ? row[namaBarangIndex].trim()
+          : '';
+      final kodeBarang = row.length > kodeBarangIndex
+          ? row[kodeBarangIndex].trim()
+          : '';
+      final jumlahBarang = row.length > jumlahBarangIndex
+          ? row[jumlahBarangIndex].trim()
+          : '';
+      final satuan = row.length > satuanIndex
+          ? row[satuanIndex].trim()
+          : '';
+      final posisiLemari = row.length > posisiLemariIndex
+          ? row[posisiLemariIndex].trim()
+          : '';
+
+      return {
+        "Tanggal": tanggal,
+        "Nama Barang": namaBarang,
+        "Kode Barang": kodeBarang,
+        "Jumlah": jumlahBarang,
+        "Satuan": satuan,
+        "Posisi Lemari": posisiLemari,
+      };
+    }).where((e) => e["Nama Barang"]!.isNotEmpty).toList();
+    return result;
+
+  } catch (e) {
+    debugPrint("Error getListDataBarangMasuk: $e");
+    rethrow;
+  }
+}
+
 String convertGoogleSheetsDate(dynamic value) {
   try {
     if (value == null) {
       return '';
     }
-
     final text = value.toString().trim();
-
     if (text.isEmpty) {
       return '';
     }
 
-    // Jika sudah dalam format yyyy-MM-dd
     if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(text)) {
       return text;
     }
 
-    // Jika bisa langsung dibaca sebagai DateTime
     final parsedDate = DateTime.tryParse(text);
-
     if (parsedDate != null) {
       return DateFormat('yyyy-MM-dd').format(parsedDate);
     }
 
-    // Jika Google Sheets memberikan serial number
     final serial = double.tryParse(text);
-
     if (serial == null) {
       return text;
     }
@@ -594,6 +701,51 @@ String convertGoogleSheetsDate(dynamic value) {
     return DateFormat('yyyy-MM-dd').format(date);
   } catch (e) {
     print('Error convertGoogleSheetsDate: $e');
+    return '';
+  }
+}
+
+String convertGoogleSheetsTime(dynamic value) {
+  try {
+    if (value == null) {
+      return '';
+    }
+
+    final text = value.toString().trim();
+    if (text.isEmpty) {
+      return '';
+    }
+
+    if (RegExp(r'^\d{2}:\d{2}:\d{2}$').hasMatch(text)) {
+      return text;
+    }
+
+    if (RegExp(r'^\d{2}:\d{2}$').hasMatch(text)) {
+      return '$text:00';
+    }
+
+    final parsedDate = DateTime.tryParse(text);
+
+    if (parsedDate != null) {
+      return DateFormat('HH:mm:ss').format(parsedDate);
+    }
+
+    final serial = double.tryParse(text);
+
+    if (serial == null) {
+      return text;
+    }
+
+    final totalSeconds = (serial * 24 * 60 * 60).round();
+    final hours = (totalSeconds ~/ 3600) % 24;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+
+    return '${hours.toString().padLeft(2, '0')}:'
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${seconds.toString().padLeft(2, '0')}';
+  } catch (e) {
+    print('Error convertGoogleSheetsTime: $e');
     return '';
   }
 }
@@ -658,9 +810,6 @@ Future<List<Map<String, String>>> getListUsers() async {
       return user["FullName"]!.isNotEmpty;
     }).toList();
 
-    debugPrint("Jumlah user ditemukan: ${result.length}");
-    debugPrint("Data user: $result");
-
     return result;
   } catch (e) {
     debugPrint("Error getListUsers: $e");
@@ -668,71 +817,72 @@ Future<List<Map<String, String>>> getListUsers() async {
   }
 }
 
-Future<List<Map<String, dynamic>>> getDataDashboardStok() async {
+Future<List<Map<String, String>>> getListNotifikasi() async {
+  final worksheet = GSheetsServicesEmployees.sheetNotif;
+
+  if (worksheet == null) {
+    throw Exception(
+      'Sheet Notifikasi belum diinisialisasi.',
+    );
+  }
+
   try {
-    if (GSheetsServicesEmployees.sheetsDashboard == null) {
-      await GSheetsServicesEmployees.init();
-    }
-
-    final worksheet = GSheetsServicesEmployees.sheetsDashboard;
-
-    if (worksheet == null) {
-      print('Worksheet Dashboard tidak ditemukan');
-      return [];
-    }
-    final rows = await worksheet.values.map.allRows();
-
-    if (rows == null || rows.isEmpty) {
-      print('Data Dashboard kosong');
+    final rows = await worksheet.values.allRows();
+    if (rows.length < 2) {
       return [];
     }
 
-    final List<Map<String, dynamic>> result = [];
+    final header = rows[0];
+    final tanggalindex = header.indexWhere((h) => h.toString().trim() == 'Tanggal');
+    final namaprosesindex = header.indexWhere((h) => h.toString().trim() == 'NamaProses');
+    final kodebarangindex = header.indexWhere((h) => h.toString().trim() == 'KodeBarang');
+    final namabarangindex = header.indexWhere((h) => h.toString().trim() == 'NamaBarang');
+    final jumlahbarangindex = header.indexWhere((h) => h.toString().trim() == 'JumlahBarang');
+    final satuanindex = header.indexWhere((h) => h.toString().trim() == 'Satuan');
+    final lemariindex = header.indexWhere((h) => h.toString().trim() == 'Lemari',);
+    final picindex = header.indexWhere((h) => h.toString().trim() == 'PIC');
+    final keteranganindex = header.indexWhere((h) => h.toString().trim() == 'Keterangan');
+    final waktuindex = header.indexWhere((h) => h.toString().trim() == 'Waktu');
 
-    String currentLemari = '';
-
-    for (final row in rows) {
-      final nama = row['A']?.toString().trim() ?? '';
-
-
-      if (nama.isEmpty) {
-        continue;
-      }
-
-
-      if (nama.toLowerCase().contains('summary lemari')) {
-        currentLemari = nama;
-        continue;
-      }
-
-      if (currentLemari.isEmpty) {
-        continue;
-      }
-
-      // Abaikan header
-      if (nama.toLowerCase() == 'jumlah jenis barang' ||
-          nama.toLowerCase() == 'total stok awal' ||
-          nama.toLowerCase() == 'total barang masuk' ||
-          nama.toLowerCase() == 'total barang keluar' ||
-          nama.toLowerCase() == 'total stok saat ini' ||
-          nama.toLowerCase() == 'jumlah barang kurang') {
-
-        result.add({
-          'lemari': currentLemari,
-          'nama': nama,
-          'jumlah': row['B']?.toString() ?? '0',
-          'status': row['C']?.toString() ?? '',
-          'jumlahStatus': row['D']?.toString() ?? '0',
-        });
-      }
+    if (tanggalindex == -1 || namaprosesindex == -1 || kodebarangindex == -1 ||
+        namabarangindex == -1 || jumlahbarangindex == -1 || satuanindex == -1 ||
+        lemariindex == -1 || picindex == -1 || keteranganindex == -1 || waktuindex == -1) {
+      throw Exception(
+        'Kolom Tanggal, NamaProses, KodeBarang, NamaBarang, '
+            'JumlahBarang, Satuan, Lemari, PIC, Keterangan, '
+            'atau Waktu tidak ditemukan.',
+      );
     }
 
-    print('Data Dashboard: $result');
+    String getValue(List<dynamic> row, int index) {
+      if (index >= 0 && index < row.length) {
+        return row[index].toString().trim();
+      }
+      return "";
+    }
 
+    final result = rows.skip(1).map((row) {
+      final tanggalNotif = convertGoogleSheetsDate(getValue(row, tanggalindex));
+      final waktuNotif = convertGoogleSheetsTime(getValue(row, waktuindex));
+      return {
+        "Tanggal": tanggalNotif,
+        "NamaProses": getValue(row, namaprosesindex),
+        "KodeBarang": getValue(row, kodebarangindex),
+        "NamaBarang": getValue(row, namabarangindex),
+        "JumlahBarang": getValue(row, jumlahbarangindex),
+        "Satuan": getValue(row, satuanindex),
+        "Lemari": getValue(row, lemariindex),
+        "PIC": getValue(row, picindex),
+        "Keterangan": getValue(row, keteranganindex),
+        "Waktu": waktuNotif,
+      };
+    }).where((notif) {
+      return notif["KodeBarang"]?.isNotEmpty ?? false;
+    }).toList();
     return result;
   } catch (e) {
-    print('Error getDataDashboardStok: $e');
-    return [];
+    debugPrint("Error getListNotifikasi: $e",);
+    rethrow;
   }
 }
 
@@ -807,6 +957,7 @@ Future<List<Map<String, dynamic>>> sideBarPagesController() async {
     sideBarPosisiController.text = user['Roles']?.toString() ?? '';
     sideBarEmployeeIDController.text = user['EmployeeID']?.toString() ?? '';
     sideBarUserNamesController.text = user['UserName']?.toString() ?? '';
+    sideBarEmailController.text = user['Email']?.toString() ?? '';
   }
   return result;
 }
@@ -849,6 +1000,44 @@ Future<List<Map<String, dynamic>>> findOTPCodes() async {
   }
 }
 
+Future<List<Map<String, dynamic>>> findOTPCodesForgot() async {
+  try {
+    if (GSheetsServicesEmployees.sheetOTP == null) {
+      await GSheetsServicesEmployees.init();
+    }
+
+    final rows = await GSheetsServicesEmployees.sheetOTP!.values.map.allRows();
+
+    if (rows == null || rows.isEmpty) {
+      return [];
+    }
+
+    final emailsOTP = otpemailforgotcontroller.text.trim();
+
+    if (emailsOTP.isEmpty) {
+      return [];
+    }
+
+    final result = rows.where((row) {
+      final valueEmailsOTP = row['EmailOTP']?.toString().trim() ?? '';
+      return valueEmailsOTP == emailsOTP;
+    }).toList();
+
+    if (result.isNotEmpty) {
+      final otp = result.first;
+
+      sendOTPForgotControllers.text = otp['OTPCode']?.toString() ?? '';
+
+    } else {
+      sendOTPForgotControllers.clear();
+    }
+
+    return result;
+  } catch (e) {
+    return [];
+  }
+}
+
 Future<List<Map<String, dynamic>>> validationOTP() async {
   try {
     if (GSheetsServicesEmployees.sheetOTP  == null) {
@@ -878,6 +1067,45 @@ Future<List<Map<String, dynamic>>> validationOTP() async {
       Get.to(() => const ChangesPasswordPages());
       await GsheetsOTPControllers().deleteOTPCodes();
       otpcontrollers.clear();
+      ClearControllerFunc.clearControllers();
+    }
+
+    return results;
+  } catch (e) {
+    return [];
+  }
+}
+
+Future<List<Map<String, dynamic>>> validationOTPForgot() async {
+  try {
+    if (GSheetsServicesEmployees.sheetOTP  == null) {
+      await GSheetsServicesEmployees.init();
+    }
+
+    final rows =
+    await GSheetsServicesEmployees.sheetOTP!.values.map.allRows();
+
+    if (rows == null || rows.isEmpty) {
+      return [];
+    }
+
+    final emailOTP = otpemailforgotcontroller.text.trim();
+    final otpCodes = otpforgotcontrollers.text.trim();
+
+    final results = rows.where((row) {
+
+      final valueEmailOTP = row['EmailOTP']?.toString().trim() ?? '';
+      final valuesOTPCodes = row['OTPCode']?.toString().trim() ?? '';
+
+      return valueEmailOTP == emailOTP && valuesOTPCodes == otpCodes;
+
+    }).toList();
+
+    if (results.isNotEmpty) {
+      Get.to(() => const ForgotPasswordPages());
+      await GsheetsOTPControllers().deleteOTPCodesForgot();
+      otpforgotcontrollers.clear();
+      ClearControllerFunc.clearControllers();
     }
 
     return results;
@@ -911,6 +1139,68 @@ Future<List<Map<String, dynamic>>> validationEmailOTP() async {
   }).toList();
 }
 
+Future<List<Map<String, dynamic>>> validationEmailOTPForgot() async {
+  if (GSheetsServicesEmployees.sheet == null) {
+    await GSheetsServicesEmployees.init();
+  }
+
+  final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
+
+  if (rows!.isEmpty) {
+    return [];
+  }
+
+  final emailOTPs = otpemailforgotcontroller.text.trim();
+
+  return rows.where((row) {
+
+    final valueEmails = row['Email']?.toString() ?? '';
+
+    if (valueEmails == emailOTPs) {
+      Get.to(() => const OtpVerificationsForgotPages());
+    }
+    return valueEmails.contains(emailOTPs) ;
+
+  }).toList();
+}
+
+Future<List<Map<String, dynamic>>> validationCountAdmin() async {
+  if (GSheetsServicesEmployees.sheet == null) {
+    await GSheetsServicesEmployees.init();
+  }
+
+  final rows = await GSheetsServicesEmployees.sheet!.values.map.allRows();
+
+  if (rows == null || rows.isEmpty) {
+    Get.snackbar('Gagal', 'Data admin tidak ditemukan',
+      snackPosition: SnackPosition.BOTTOM,
+    );
+
+    return [];
+  }
+
+  final adminRows = rows.where((row) {
+    final role = row['Roles']?.toString().trim().toUpperCase();
+    return role == 'ADMIN';
+  }).toList();
+
+  final jumlahAdmin = adminRows.length;
+
+  print('Jumlah ADMIN: $jumlahAdmin');
+
+  // Jika ADMIN lebih dari 2
+  if (jumlahAdmin == 2) {
+    Get.snackbar(
+      'Akses Ditolak', 'Jumlah ADMIN sudah lebih dari 2.',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+        colorText: Colors.white
+    );
+    return adminRows;
+  }
+  Get.to(() => const RegistrationsMenu());
+  return adminRows;
+}
 
 Future<bool> deleteUser() async {
   try {
@@ -947,8 +1237,7 @@ Future<bool> deleteUser() async {
     final employeeIdValue = user['EmployeeID']?.toString().trim() ?? '';
     final usernameValue = user['UserName']?.toString().trim() ?? '';
 
-    final allRows =
-    await GSheetsServicesEmployees.sheet!.values.allRows();
+    final allRows = await GSheetsServicesEmployees.sheet!.values.allRows();
 
     if (allRows.isEmpty) {
       return false;

@@ -1,17 +1,6 @@
-import 'package:appsenginventory/ChangesPassword/changespasswordpages.dart';
-import 'package:appsenginventory/HomePages/homepagesbutton.dart';
-import 'package:appsenginventory/MenuPages/navigationmenu.dart';
-import 'package:appsenginventory/OTPVerfications/EmailOTP/emailotppages.dart';
-import 'package:appsenginventory/RevampBarangKeluar/revampbarangkeluarpages.dart';
-import 'package:appsenginventory/RevampBarangMasuk/revampbarangmasukpages.dart';
-import 'package:appsenginventory/RevampRegistrations/revampregistrationpages.dart';
-import 'package:appsenginventory/Services/gsheetscontrollers.dart';
-import 'package:appsenginventory/Services/gsheetsservices.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:gsheets/gsheets.dart';
 
-import '../MenuPages/menupages.dart';
+import 'package:appsenginventory/HomePages/homepagesbutton.dart';
+import 'package:flutter/material.dart';
 
 class Homepagesmenus extends StatefulWidget {
   const Homepagesmenus({super.key});
@@ -37,50 +26,17 @@ class _HomepagesmenusState extends State<Homepagesmenus> {
                 width: double.infinity,
               ),
           ),
-           Align(
+           const Align(
             alignment:  Alignment(0, 0.35), // X, Y
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children:  [
-                SizedBox(height: 150),
+                SizedBox(height: 80),
                 Hompagesbuttons(),
                 SizedBox(height: 16),
                 Text(
                   "Version 1.0.0",
                   style: TextStyle(color: Colors.black87),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextButton(
-                  onPressed: () {
-                    Get.offAll(() => const NavigationMenuPages());
-                  },
-                  child: const Text(
-                    "UjiCoba MenuPages",
-                    style: TextStyle(
-                      color: Colors.blueAccent,
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                TextButton(
-                  onPressed: () async {
-                    Get.to(() => EmailOTPPages());
-                    //Get.to(() => const RevampBarangKeluarPages());
-                    //await GSheetsServicesEmployees.init();
-                    //await getDataBarangLemari1();
-                    //await GSheetsServicesEmployees.init();
-                    //await getDataPosisi();
-                  },
-                  child: const Text(
-                    "UjiCoba Logic",
-                    style: TextStyle(
-                      color: Colors.blueAccent,
-                    ),
-                  ),
                 ),
               ],
             ),

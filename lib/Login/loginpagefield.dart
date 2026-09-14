@@ -1,5 +1,6 @@
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:appsenginventory/ForgotPassword/forgotpasswordpages.dart';
+import 'package:appsenginventory/OTPVerfications/EmailOtpForgotPassword/emailforgotpages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -98,26 +99,13 @@ class _LoginpagefieldState extends State<Loginpagefield> {
                 ),
                 Row(
                   children: [
-                    Checkbox(
-                      value: rememberMe,
-                      activeColor: const Color(0xff123D8C),
-                      onChanged: (value) {
-                        setState(() {
-                          rememberMe = value!;
-                        });
-                      },
-                    ),
-                    const Text(
-                      "Ingat saya",
-                      style: TextStyle(fontSize: 14),
-                    ),
                     const SizedBox(
                       width: 30,
                     ),
                     TextButton(
                       onPressed: () {
                         setState(() {
-                          Get.to(() => const ForgotPasswordPages());
+                          Get.to(() => const EmailOTPForgotPages());
                         });
                       },
                       child: const Text(''

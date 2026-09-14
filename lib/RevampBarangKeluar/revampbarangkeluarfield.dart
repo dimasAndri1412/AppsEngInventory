@@ -417,6 +417,7 @@ class _RevampBarangKeluarFieldState extends State<RevampBarangKeluarField> {
                   controllersss["satuanBarangKeluar"]?.text = barangDipilih["Satuan"] ?? "";
                   controllersss["stockawalBarangkeluar"]?.text = barangDipilih["Stok Awal"] ?? "";
                   controllersss["stockAkhirBarangKeluar"]?.text = barangDipilih["Stok Akhir"] ?? "";
+                  controllersss["picBarangKeluar"]?.text = sideBarFullNameController.text;
                 });
               },
           ),
@@ -565,30 +566,37 @@ class _RevampBarangKeluarFieldState extends State<RevampBarangKeluarField> {
           const SizedBox(
             height: 5,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 5,
+            runSpacing: 5,
             children: [
               const Text(
-                "Masukan Barang Keluar Lainya",
+                "Barang Keluar Lainya",
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Color.fromARGB(255, 8, 36, 87),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                  color: Color.fromARGB(255, 8, 36, 87),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(width: 5),
+
               FloatingActionButton(
                 onPressed: addNewsContainers,
                 heroTag: null,
+                mini: true,
                 backgroundColor: const Color.fromARGB(255, 8, 36, 87),
                 child: const Icon(
                   Icons.add,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 5),
+
               FloatingActionButton(
                 onPressed: removeRegistContainer,
                 heroTag: null,
+                mini: true,
                 backgroundColor: Colors.red,
                 child: const Icon(
                   Icons.delete,

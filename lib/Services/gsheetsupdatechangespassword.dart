@@ -12,7 +12,6 @@ Future<bool> updatePassword() async {
     final rows = await worksheet.values.map.allRows();
 
     if (rows == null || rows.isEmpty) {
-      print('Data Google Sheets kosong');
       return false;
     }
 
@@ -22,7 +21,6 @@ Future<bool> updatePassword() async {
     const newStatusLogin = '1';
 
     if (email.isEmpty || username.isEmpty || newPassword.isEmpty) {
-      print('Email, Username, atau Password masih kosong');
       return false;
     }
 
@@ -35,13 +33,9 @@ Future<bool> updatePassword() async {
       if (sheetEmail == email && sheetUsername == username) {
 
         final sheetRow = i + 2;
-        print('User ditemukan pada baris: $sheetRow');
 
         await worksheet.values.insertValue(newPassword, column: 12, row: sheetRow,);
         await worksheet.values.insertValue(newStatusLogin, column: 13, row: sheetRow,);
-
-        print('Password berhasil diupdate');
-        print('StatusLogin berhasil diupdate menjadi 1');
 
         return true;
       }

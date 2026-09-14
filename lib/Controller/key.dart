@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 // RegistrationKey
-final GlobalKey<FormState> formKeys = GlobalKey<FormState>();
+final GlobalKey<FormState> formRegistKeys = GlobalKey<FormState>();
 
 // LoginPageKey
 final GlobalKey<FormState> loginkeys = GlobalKey<FormState>();
@@ -36,8 +36,16 @@ final GlobalKey<FormState> forgotpasswordkey = GlobalKey<FormState>();
 // OTP Key
 final GlobalKey<FormState> otpveryficationskeys = GlobalKey<FormState>();
 
+// OTP Key
+final GlobalKey<FormState> otpveryficationsforgotkeys = GlobalKey<FormState>();
+
 // emailOTPKey
 final GlobalKey<FormState> otpEmailKeys = GlobalKey<FormState>();
+
+// emailOTPKey
+final GlobalKey<FormState> otpEmailForgotKeys = GlobalKey<FormState>();
+
+//
 
 // LoginPageController
 final loginUserNameController = TextEditingController();
@@ -135,8 +143,11 @@ final changesPersonalSettingAlamat = TextEditingController();
 
 //otpemailcontrollers
 final otpcontrollers = TextEditingController();
+final otpforgotcontrollers = TextEditingController();
 final otpemailcontroller = TextEditingController();
+final otpemailforgotcontroller = TextEditingController();
 final sendOTPControllers = TextEditingController();
+final sendOTPForgotControllers = TextEditingController();
 final otpFullNamesController = TextEditingController();
 final otpCreateTimes = TextEditingController();
 final emailscontroller = TextEditingController();
@@ -147,6 +158,7 @@ final sideBarJabatanController = TextEditingController();
 final sideBarPosisiController = TextEditingController();
 final sideBarEmployeeIDController = TextEditingController();
 final sideBarUserNamesController = TextEditingController();
+final sideBarEmailController = TextEditingController();
 
 // card controller
 final jumlahJenisBarangLemari1Controller = TextEditingController();
@@ -169,3 +181,11 @@ final totalBarangMasukLemari3Controller = TextEditingController();
 final totalBarangKeluarLemari3Controller = TextEditingController();
 final totalStokSaatIniLemari3Controller = TextEditingController();
 final jumlahBarangKurangLemari3Controller = TextEditingController();
+
+final loginEmployeeidController = TextEditingController();
+final loginFullNameController = TextEditingController();
+final loginUserNameControllers = TextEditingController();
+final loginPosisiControllers = TextEditingController();
+final loginDatesControllers = TextEditingController();
+final loginTimeControllers = TextEditingController();
+

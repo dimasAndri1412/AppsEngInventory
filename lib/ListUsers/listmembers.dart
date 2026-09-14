@@ -1,22 +1,39 @@
+import 'package:appsenginventory/RevampRegistrations/revampregistrationpages.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../Services/gsheetscontrollers.dart';
+import '../Services/gsheetsdeleteusers.dart';
 import 'detailusers.dart';
 
 
 class ListUsersPages extends StatefulWidget {
-  const ListUsersPages({super.key});
+  const ListUsersPages({
+    super.key,
+  });
 
   @override
-  State<ListUsersPages> createState() => _ListUsersPagesState();
+  State<ListUsersPages> createState() =>
+      _ListUsersPagesState();
 }
 
-class _ListUsersPagesState extends State<ListUsersPages> {
+
+class _ListUsersPagesState
+    extends State<ListUsersPages> {
+
   List<Map<String, String>> allUsers = [];
+
   List<Map<String, String>> filteredUsers = [];
+
   bool isLoading = true;
-  final TextEditingController searchController = TextEditingController();
+
+  bool isDeleting = false;
+
+  final TextEditingController searchController =
+  TextEditingController();
+
   String currentRole = "ADMIN";
+
 
   @override
   void initState() {
@@ -24,93 +41,314 @@ class _ListUsersPagesState extends State<ListUsersPages> {
     loadUsers();
   }
 
+
   @override
   void dispose() {
     searchController.dispose();
     super.dispose();
   }
 
+
   Future<void> loadUsers() async {
-    setState(() {
-      isLoading = true;
-    });
+
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
+
       final data = await getListUsers();
+
       List<Map<String, String>> result = [];
-      if (currentRole.toUpperCase() == "ADMIN") {
+
+      if (currentRole.toUpperCase() ==
+          "ADMIN") {
+
         result = data;
       }
+
       else {
+
         result = data.where((user) {
-          return (user["Posisi"] ?? "").toUpperCase() == "MEMBER";
+
+          return (user["Posisi"] ?? "")
+              .toUpperCase() ==
+              "MEMBER";
+
         }).toList();
       }
+
       if (!mounted) return;
 
       setState(() {
+
         allUsers = result;
+
         filteredUsers = result;
+
         isLoading = false;
+
       });
+
     } catch (e) {
-      debugPrint("Error loadUsers: $e");
 
       if (!mounted) return;
 
       setState(() {
+
         allUsers = [];
+
         filteredUsers = [];
+
         isLoading = false;
+
       });
 
       Get.snackbar(
         "Error", "Gagal mengambil data user",
         backgroundColor: Colors.red,
         colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
       );
     }
   }
 
   void filterUsers(String value) {
+
     final search = value.toLowerCase().trim();
 
     setState(() {
+
       if (search.isEmpty) {
         filteredUsers = allUsers;
+
         return;
       }
 
       filteredUsers = allUsers.where((user) {
-        final employeeID = (user["EmployeeID"] ?? "").toLowerCase();
-        final fullName = (user["FullName"] ?? "").toLowerCase();
-        final username = (user["UserName"] ?? "").toLowerCase();
-        final email = (user["Email"] ?? "").toLowerCase();
-        final posisi = (user["Posisi"] ?? "").toLowerCase();
-
-        return employeeID.contains(search) ||
-            fullName.contains(search) ||
-            username.contains(search) ||
-            email.contains(search) ||
-            posisi.contains(search);
-      }).toList();
+            final employeeID = (user["EmployeeID"] ?? "").toLowerCase();
+            final fullName = (user["FullName"] ?? "").toLowerCase();
+            final username = (user["UserName"] ?? "").toLowerCase();
+            final email = (user["Email"] ?? "").toLowerCase();
+            final posisi = (user["Posisi"] ?? "").toLowerCase();
+            return employeeID.contains(search) || fullName.contains(search) ||
+                username.contains(search) || email.contains(search) || posisi.contains(search);
+          }).toList();
     });
   }
 
+
+  Future<void> _confirmDeleteUser({
+    required BuildContext context,
+    required String employeeID,
+    required String fullName,
+  }) async {
+
+    if (isDeleting) {
+      return;
+    }
+
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+
+      builder: (dialogContext) {
+
+        return AlertDialog(
+
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+
+          title: const Row(
+            children: [
+
+              Icon(
+                Icons.delete_outline,
+                color: Colors.red,
+                size: 28,
+              ),
+
+              SizedBox(width: 10),
+
+              Text(
+                "Hapus User",
+                style: TextStyle(
+                  fontWeight:
+                  FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+
+            children: [
+
+              const Text(
+                "Apakah Anda yakin ingin "
+                    "menghapus user berikut?",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fullName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(height: 5),
+
+                    Text(
+                      "Employee ID: $employeeID",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              const Text(
+                "Data akan dihapus secara permanen "
+                    "dari Google Sheets.",
+                style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+
+          actions: [
+
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext,).pop(false);
+              },
+
+              child: const Text(
+                "Batal",
+                style: TextStyle(
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+
+            ElevatedButton(
+
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () {
+                Navigator.of(dialogContext,).pop(true);
+
+              },
+              child: const Text("Hapus"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      isDeleting = true;
+    });
+
+    final bool success = await deleteUserByEmployeeID(
+      employeeID: employeeID,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      isDeleting = false;
+    });
+
+    if (success) {
+
+      Get.snackbar(
+        "Berhasil",
+        "User $fullName berhasil dihapus.",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 2),
+      );
+
+      await loadUsers();
+
+    }
+
+    else {
+
+      Get.snackbar(
+        "Gagal", "User dengan EmployeeID "
+            "$employeeID tidak ditemukan "
+            "atau gagal dihapus.",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor: const Color(0xffF4F6FA),
 
       body: SafeArea(
+
         child: Column(
+
           children: [
+
             Stack(
+
               children: [
 
                 Container(
-                  height: 125,
 
+                  height: 125,
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
@@ -124,10 +362,13 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                     ),
                   ),
                 ),
+
                 const Positioned(
+
                   top: 15,
                   left: 20,
                   right: 20,
+
                   child: Center(
                     child: Text(
                       "LIST MEMBER",
@@ -139,21 +380,31 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                     ),
                   ),
                 ),
+
+
                 Positioned(
+
                   bottom: 10,
                   left: 20,
                   right: 20,
+
                   child: Container(
+
                     height: 45,
+
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(25),
+                      borderRadius: BorderRadius.circular(
+                        25,
+                      ),
                     ),
+
                     child: TextField(
+
                       controller: searchController,
                       onChanged: filterUsers,
                       decoration: InputDecoration(
+
                         hintText: "Cari nama, ID, username...",
                         border: InputBorder.none,
                         prefixIcon: IconButton(
@@ -174,17 +425,24 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                 ),
               ],
             ),
+
             const SizedBox(height: 12),
+
             Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20),
+
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+              ),
+
               child: Row(
                 children: [
                   const Icon(
                     Icons.people_alt_outlined,
                     color: Color(0xff2457A6),
                   ),
+
                   const SizedBox(width: 8),
+
                   Text(
                     "${filteredUsers.length} Member",
                     style: const TextStyle(
@@ -192,18 +450,24 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   const Spacer(),
+
                   if (currentRole.toUpperCase() == "ADMIN")
+
                     Container(
+
                       padding: const EdgeInsets.symmetric(
                         horizontal: 10,
                         vertical: 5,
                       ),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
-                        borderRadius:
-                        BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(
+                          20,
+                        ),
                       ),
+
                       child: const Text(
                         "ADMIN",
                         style: TextStyle(
@@ -216,24 +480,26 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                 ],
               ),
             ),
+
             const SizedBox(height: 8),
+
             Expanded(
-              child: isLoading
-                  ? const Center(
+
+              child: isLoading ? const Center(
                 child: CircularProgressIndicator(),
-              )
-                  : filteredUsers.isEmpty
-                  ? const Center(
+              ) : filteredUsers.isEmpty ? const Center(
+
                 child: Column(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       Icons.person_search,
                       size: 60,
                       color: Colors.grey,
                     ),
+
                     SizedBox(height: 10),
+
                     Text(
                       "Data member tidak ditemukan",
                       style: TextStyle(
@@ -243,10 +509,11 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                     ),
                   ],
                 ),
-              )
+              ) : RefreshIndicator(
 
-                  : RefreshIndicator(onRefresh: loadUsers,
+                onRefresh: loadUsers,
                 child: ListView.builder(
+
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 5,
@@ -254,59 +521,71 @@ class _ListUsersPagesState extends State<ListUsersPages> {
 
                   itemCount: filteredUsers.length,
                   itemBuilder: (context, index) {
+
                     final user = filteredUsers[index];
                     final fullName = user["FullName"] ?? "";
                     final employeeID = user["EmployeeID"] ?? "";
                     final username = user["UserName"] ?? "";
                     final posisi = user["Posisi"] ?? "";
                     return InkWell(
-                      borderRadius: BorderRadius.circular(16),
+
+                      borderRadius: BorderRadius.circular(16,),
+
                       onTap: () {
-                        Get.to(() => DetailUserPages(
-                            user: user,
-                          ),
+
+                        if (isDeleting) {
+                          return;
+                        }
+                        Get.to(() => DetailUserPages(user: user),
                         );
                       },
+
                       child: Card(
+
                         color: Colors.white,
                         elevation: 2,
                         margin: const EdgeInsets.only(
                           bottom: 12,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            16,),
+                          borderRadius: BorderRadius.circular(16),
                         ),
+
                         child: Padding(
                           padding: const EdgeInsets.all(13),
-
                           child: Row(
+
                             children: [
+
                               Container(
+
                                 width: 58,
                                 height: 58,
+
                                 decoration: BoxDecoration(
-                                  color: const Color(0xffEAF1FF,),
+                                  color: const Color(0xffEAF1FF),
                                   borderRadius: BorderRadius.circular(14),
                                 ),
 
                                 child: const Icon(
                                   Icons.person,
                                   size: 32,
-                                  color: Color(
-                                    0xff2457A6,
-                                  ),
+                                  color: Color(0xff2457A6),
                                 ),
                               ),
 
                               const SizedBox(width: 13),
 
                               Expanded(
+
                                 child: Column(
+
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+
                                     Text(
                                       fullName,
+
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(
@@ -314,15 +593,23 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+
                                     const SizedBox(height: 4),
-                                    Text(employeeID,
+
+                                    Text(
+                                      employeeID,
+
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.grey.shade600,
                                       ),
                                     ),
+
                                     const SizedBox(height: 3),
-                                    Text("@$username",
+
+                                    Text(
+                                      "@$username",
+
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
@@ -334,34 +621,62 @@ class _ListUsersPagesState extends State<ListUsersPages> {
                                 ),
                               ),
 
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 5),
 
                               Container(
+
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
                                   vertical: 6,
                                 ),
 
                                 decoration: BoxDecoration(
-                                  color: posisi.toUpperCase() == "ADMIN" ? Colors.orange
-                                      .shade50 : Colors.blue.shade50,
+                                  color: posisi.toUpperCase() ==
+                                      "ADMIN" ? Colors.orange.shade50
+                                      : Colors.blue.shade50,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
+
                                 child: Text(
                                   posisi.isEmpty
                                       ? "-"
                                       : posisi,
 
                                   style: TextStyle(
-                                    color: posisi.toUpperCase() ==
-                                        "ADMIN" ? Colors.orange.shade700
+                                    color: posisi.toUpperCase() == "ADMIN" ? Colors.orange.shade700
                                         : Colors.blue.shade700,
                                     fontSize: 11,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight: FontWeight.w600
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 5),
+
+                              const SizedBox(width: 4),
+
+                              IconButton(
+
+                                tooltip: "Hapus user",
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(
+                                  minWidth: 40,
+                                  minHeight: 40,
+                                ),
+
+                                onPressed: isDeleting ? null : () {
+                                  _confirmDeleteUser(
+                                    context: context,
+                                    employeeID: employeeID,
+                                    fullName: fullName,
+                                  );
+                                },
+
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 22,
+                                  color: Colors.red,
+                                ),
+                              ),
+
                               const Icon(
                                 Icons.arrow_forward_ios,
                                 size: 15,
@@ -377,6 +692,22 @@ class _ListUsersPagesState extends State<ListUsersPages> {
               ),
             ),
           ],
+        ),
+      ),
+
+      // ======================================================
+      // FLOATING BUTTON
+      // ======================================================
+
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xff2457A6),
+        onPressed: isDeleting ? null : () {
+          Get.to(() => const RevampRegistrationsPages(),
+          );
+        },
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
         ),
       ),
     );

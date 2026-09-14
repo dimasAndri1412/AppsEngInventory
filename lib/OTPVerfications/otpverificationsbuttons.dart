@@ -1,7 +1,6 @@
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:flutter/material.dart';
-import 'package:get_storage/get_storage.dart';
 
 class OtpVerificationsButtons extends StatefulWidget {
   const OtpVerificationsButtons({super.key});
@@ -20,7 +19,13 @@ class _OtpVerificationsButtonsState extends State<OtpVerificationsButtons> {
             if (!otpveryficationskeys.currentState!.validate()) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Validasi Gagal! Periksa Kembali Kode OTP!.'),
+                  content: Text(
+                      'Validasi Gagal! Periksa Kembali Kode OTP!.',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.red,
                 ),
               );
               return;
@@ -29,13 +34,25 @@ class _OtpVerificationsButtonsState extends State<OtpVerificationsButtons> {
             if (results.isNotEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Kode OTP benar, Validasi Berhasil!'),
+                  content: Text(
+                      'Kode OTP benar, Validasi Berhasil!',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.green,
                 ),
               );
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Validasi Gagal! Periksa Kembali Kode OTP!'),
+                  content: Text(
+                      'Validasi Gagal! Periksa Kembali Kode OTP!',
+                    style: TextStyle(
+                      color: Colors.white
+                    ),
+                  ),
+                  backgroundColor: Colors.red,
                 ),
               );
             }

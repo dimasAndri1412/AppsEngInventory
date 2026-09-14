@@ -1,8 +1,6 @@
 import 'package:appsenginventory/SendingEmail/sendingemailfunctions.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
-import 'package:appsenginventory/Services/gsheetsotpcodecontrollers.dart';
 import 'package:flutter/material.dart';
-
 import '../../Controller/key.dart';
 import '../FunctionsOTP/functionsotp.dart';
 
@@ -17,48 +15,60 @@ class _EmailOTPButtonsState extends State<EmailOTPButtons> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: <Widget>[
-        GestureDetector (
+      children: <Widget>[GestureDetector (
         onTap: () async {
-      final otpcodes = FunctionotpKeys.generatedOTP();
-      sendOTPControllers.text = otpcodes;
+          final otpcodes = FunctionotpKeys.generatedOTP();
+          sendOTPControllers.text = otpcodes;
+          final now = DateTime.now();
+          final createTime =
+              "${now.day.toString().padLeft(2, '0')}/"
+              "${now.month.toString().padLeft(2, '0')}/"
+              "${now.year} "
+              "${now.hour.toString().padLeft(2, '0')}:"
+              "${now.minute.toString().padLeft(2, '0')}:"
+              "${now.second.toString().padLeft(2, '0')}";
+          otpCreateTimes.text = createTime;
 
-      final now = DateTime.now();
+          if (!otpEmailKeys.currentState!.validate()) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Validasi Email gagal!',
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+          final result = await validationEmailOTP();
 
-      final createTime =
-          "${now.day.toString().padLeft(2, '0')}/"
-          "${now.month.toString().padLeft(2, '0')}/"
-          "${now.year} "
-          "${now.hour.toString().padLeft(2, '0')}:"
-          "${now.minute.toString().padLeft(2, '0')}:"
-          "${now.second.toString().padLeft(2, '0')}";
-
-      otpCreateTimes.text = createTime;
-
-      if (!otpEmailKeys.currentState!.validate()) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Validasi Email gagal!'),
-          ),
-        );
-        return;
-      }
-      final result = await validationEmailOTP();
-
-      if (result.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email tidak ditemukan! OTP tidak dikirim.'),
-          ),
-        );
-        return;
-      }
-
-      await const Sendingemailfunctions().sendingEmailOTPFunc();
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Validasi Email Berhasil! OTP telah dikirim.'),
+          if (result.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                'Email tidak ditemukan! OTP tidak dikirim.',
+                  style: TextStyle(
+                      color: Colors.white
+                  ),
+                ),
+                backgroundColor: Colors.red,
+              ),
+            );
+            return;
+          }
+          await const Sendingemailfunctions().sendingEmailOTPFunc();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Validasi Email Berhasil! OTP telah dikirim.',
+                style: TextStyle(
+                    color: Colors.white
+                ),
+              ),
+              backgroundColor: Colors.green,
         ),
       );
     },

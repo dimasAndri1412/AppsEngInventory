@@ -1,3 +1,4 @@
+import 'package:appsenginventory/Controller/clearfunc.dart';
 import 'package:appsenginventory/Services/gsheetsupdateforgotpassword.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,24 +13,80 @@ class ForgotPasswordButtons extends StatefulWidget {
 }
 
 class _ForgotPasswordButtonsState extends State<ForgotPasswordButtons> {
+
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         GestureDetector (
-          onTap: () async {
-            if (forgotpasswordkey.currentState!.validate()) {
-              const snackBar = SnackBar(
-                content: Text('Perubahan Berhasil!'),
+          onTap: isLoading
+              ? null
+              : () async {
+
+            if (!forgotpasswordkey.currentState!.validate()) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    'Data belum lengkap. Silakan periksa kembali.',
+                  ),
+                ),
               );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-              await updateForgotPassword();
-              Get.to(() => const Homepagesmenus());
-            } else {
-              const snackBar = SnackBar(
-                content: Text('Perubahan Gagal!, Lakukan Kembali'),
+              return;
+            }
+
+            setState(() {
+              isLoading = true;
+            });
+
+            try {
+              final bool results = await updateForgotPassword();
+              if (!mounted) return;
+
+              if (results) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Password berhasil diperbarui!',
+                    ),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+
+                Get.offAll(() => const Homepagesmenus());
+                ClearControllerFunc.clearControllers();
+
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'Password gagal diperbarui. '
+                          'Email atau Username tidak ditemukan.',
+                    ),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+
+            } catch (e) {
+              if (!mounted) return;
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'Terjadi kesalahan: $e',
+                  ),
+                  backgroundColor: Colors.red,
+                ),
               );
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+            } finally {
+              if (mounted) {
+                setState(() {
+                  isLoading = false;
+                });
+              }
             }
           },
           child: Container(

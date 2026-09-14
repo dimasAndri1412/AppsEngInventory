@@ -48,6 +48,29 @@ Future<String> sendOTPtoEmail() async {
   return bodiesEmailsOTP;
 }
 
+Future<String> sendOTPtoEmailForgot() async {
+  await findOTPCodes();
+
+  final String bodiesEmailsForgotOTP =
+      "HI,${otpFullNamesController.text}\n"
+      "\n"
+      "YOUR OTP CODE :"
+      "\n"
+      "================================\n"
+      "OTPCODE : ${sendOTPForgotControllers.text}\n"
+      "================================\n"
+      "\n"
+      "PLEASE INSERT OTP CODE TO NEXT STEP\n"
+      "\n"
+      "\n"
+      "Thanks you\n"
+      "\n"
+      "Best Regard\n"
+      "ADMIN";
+
+  return bodiesEmailsForgotOTP;
+}
+
 final String bodyEmailFirstLogins = "HI, ${fullnamecontroller.text}\n"
     "\n"
     "YOUR GOT DEFAULT USER :\n"
@@ -65,3 +88,21 @@ final String bodyEmailFirstLogins = "HI, ${fullnamecontroller.text}\n"
     "Best Regard\n"
     "ADMIN\n\n";
 
+
+final String bodyEmailExportLaporan = "HI, ${fullnamecontroller.text}\n"
+    "\n"
+    "BERIKUT TERLAMPIR DOCUMENT LAPORAN\n"
+    "DAFTAR ALAT LEMARI BASMENT 2\n"
+    "SILAHKAN DI PERIKSA KEMBALI UNTUK LAPORANYA\n"
+    "TERIMAKASIH\n\n"
+    "BEST REGARD\n"
+    "ADMIN\n";
+
+final String bodyEmailExportLaporanPdf = "HI, ${fullnamecontroller.text}\n"
+    "\n"
+    "BERIKUT TERLAMPIR DOCUMENT LAPORAN UNTUK\n"
+    "DAFTAR ALAT LEMARI BASMENT 2 YANG SUDAH SIAP DI CETAK\n"
+    "SILAHKAN DI PERIKSA KEMBALI UNTUK LAPORANYA\n"
+    "TERIMAKASIH\n\n"
+    "BEST REGARD\n"
+    "ADMIN\n";

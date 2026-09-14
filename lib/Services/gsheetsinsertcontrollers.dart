@@ -14,6 +14,7 @@ class GsheetsInsertControllers {
   String? revampRoles;
   String? revampPass;
   String? revampPosisi;
+  String? revampStatusLogin;
 
   Future<void> revampRegistrations() async {
 
@@ -44,6 +45,8 @@ class GsheetsInsertControllers {
       revampRoles?.trim() ?? '',
       revampPosisi?.trim() ?? '',
       revampPass?.trim() ?? '',
+      revampStatusLogin?.trim() ?? '',
+
     ];
 
     final existingRows = await employeeSheet.values.allRows();

@@ -578,7 +578,9 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
                               DropdownMenuItem(value: "UNIT", child: Text("UNIT")),
                             ],
                             onChanged: (value) async {
+
                               await generateNoBarangMasuk(controllersss);
+                              controllersss["picBarangMasuk"]!.text = sideBarFullNameController.text;
                               setState(() {
                                 controllersss["satuanBarangController"]!.text = value ?? "";
                               });
@@ -602,6 +604,7 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
                 border: Border(bottom: BorderSide(color: Colors.black87))),
             child: TextFormField(
               controller: controllersss["picBarangMasuk"],
+              readOnly: true,
               decoration: const InputDecoration(
                   labelText: "PIC Barang Masuk",
                   hintText: "Silahkan Masukan PIC Barang Masuk",
@@ -723,30 +726,37 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
           const SizedBox(
             height: 5,
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+          Wrap(
+            alignment: WrapAlignment.end,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 5,
+            runSpacing: 5,
             children: [
               const Text(
-                "Masukan Barang Masuk Lainya",
+                "Barang Masuk Lainya",
+                textAlign: TextAlign.center,
                 style: TextStyle(
-                    color: Color.fromARGB(255, 8, 36, 87),
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold),
+                  color: Color.fromARGB(255, 8, 36, 87),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              const SizedBox(width: 5),
+
               FloatingActionButton(
                 onPressed: addNewsContainers,
                 heroTag: null,
+                mini: true,
                 backgroundColor: const Color.fromARGB(255, 8, 36, 87),
                 child: const Icon(
                   Icons.add,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 5),
+
               FloatingActionButton(
                 onPressed: removeRegistContainer,
                 heroTag: null,
+                mini: true,
                 backgroundColor: Colors.red,
                 child: const Icon(
                   Icons.delete,

@@ -1,6 +1,9 @@
+import 'package:appsenginventory/Controller/clearfunc.dart';
+import 'package:appsenginventory/HomePages/homepagesmenus.dart';
 import 'package:appsenginventory/Login/loginpagebuttons.dart';
 import 'package:appsenginventory/Login/loginpageheaders.dart';
 import 'package:appsenginventory/Login/loginpagewrapper.dart';
+import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -33,84 +36,96 @@ class _LoginpagemenusState extends State<Loginpagemenus> {
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color.fromARGB(255, 255, 255, 255), // Putih
-                Color.fromARGB(255, 239, 242, 247), // Abu-abu sangat muda
-                Color.fromARGB(255, 210, 220, 235), // Abu kebiruan muda
-                Color.fromARGB(255, 8, 36, 87),     // Navy gelap
-              ],
-            ),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              const Loginpageheaders(),
-              Transform.translate(
-                  offset: const Offset(0, -60),
-                  child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(5),
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(),
-                          decoration: const BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.only(
-                                  topLeft: Radius.circular(60),
-                                  topRight: Radius.circular(60),
-                                  bottomLeft: Radius.circular(60),
-                                  bottomRight: Radius.circular(60)
-                              ),
-                              boxShadow: [BoxShadow(
-                                  color: Colors.black26,
-                                  blurRadius: 15,
-                                  offset: Offset(2, 10)
-                              )]
-                          ),
-                          child: const SingleChildScrollView(
-                            child: Loginpagewrappers(),
-                          ),
-                        ),
-                      )
-                  ),
-              ),
-              const Loginpagebuttons(),
-              const SizedBox(
-                height: 10,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                      'Jika Belum Memiliki Account Klik?',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15
-                    ),
-                  ),
-                  TextButton(
-                      onPressed: () {
-                        Get.to(() => const RegistrationsMenu());
-                      },
-                      child: const Text(
-                        'Daftar!',
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20
-                        ),
-                      )
-                  )
-                ],
-
-              )
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color.fromARGB(255, 255, 255, 255),
+              Color.fromARGB(255, 239, 242, 247),
+              Color.fromARGB(255, 210, 220, 235),
+              Color.fromARGB(255, 8, 36, 87),
             ],
           ),
         ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    const Loginpageheaders(),
+
+                    Transform.translate(
+                      offset: const Offset(0, -60),
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(60),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 15,
+                                  offset: Offset(2, 10),
+                                ),
+                              ],
+                            ),
+                            child: const SingleChildScrollView(
+                              child: Loginpagewrappers(),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const Loginpagebuttons(),
+
+                    const SizedBox(
+                      height: 10,
+                    ),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Jika Belum Memiliki Account Klik?',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            await validationCountAdmin();
+                          },
+                          child: const Text(
+                            'Daftar!',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
       ),
     );
   }
@@ -143,7 +158,7 @@ class _LoginpagemenusState extends State<Loginpagemenus> {
               ),
               TextButton(onPressed: (){
                 Get.back();
-                //ctr_data().clear_func();
+                ClearControllerFunc.clearControllers();
                 Get.back();
               },
                 child: const Text("YES",style:

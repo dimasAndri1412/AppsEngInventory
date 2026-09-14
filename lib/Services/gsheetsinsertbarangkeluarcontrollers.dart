@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'gsheetsservices.dart';
 
 class GsheetsInsertBarangKeluar {
-  String? revampNomerUrutBarangKeluar;
   String? revampKodeBarangKeluar;
   String? revampTanggalBarangKeluar;
   String? revampNamaBarangKeluar;
@@ -20,7 +19,6 @@ class GsheetsInsertBarangKeluar {
     final sheet = GSheetsServicesEmployees.sheetsBarangKeluar!;
 
     final row = [
-      revampNomerUrutBarangKeluar ?? "",
       revampKodeBarangKeluar ?? "",
       revampTanggalBarangKeluar ?? "",
       revampNamaBarangKeluar ?? "",

@@ -330,29 +330,22 @@ class _SummaryCardPagesState extends State<SummaryCardPages> {
 
           const SizedBox(height: 15),
 
-          Row(
+          Wrap(
+            spacing: 15,
+            runSpacing: 8,
             children: [
               _buildLegend(
                 'Stok Awal',
                 Colors.blue,
               ),
-
-              const SizedBox(width: 15),
-
               _buildLegend(
                 'Barang Masuk',
                 Colors.green,
               ),
-
-              const SizedBox(width: 15),
-
               _buildLegend(
                 'Barang Keluar',
                 Colors.orange,
               ),
-
-              const SizedBox(width: 15),
-
               _buildLegend(
                 'Stok Saat Ini',
                 Colors.red,

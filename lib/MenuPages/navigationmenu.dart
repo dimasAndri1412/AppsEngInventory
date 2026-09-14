@@ -1,5 +1,6 @@
 import 'package:appsenginventory/ListBarangDiLemari/listbarangperlemari.dart';
 import 'package:appsenginventory/MenuPages/menupages.dart';
+import 'package:appsenginventory/Reporting/reportingpages.dart';
 import 'package:flutter/material.dart';
 import '../RevampBarangKeluar/revampbarangkeluarpages.dart';
 
@@ -17,7 +18,8 @@ class _NavigationMenuPagesState extends State<NavigationMenuPages> {
   final List<Widget> pages = const [
     Menupages(),
     Listbarangperlemari(),
-    RevampBarangKeluarPages()
+    RevampBarangKeluarPages(),
+    ReportingBarangPages()
   ];
 
   @override

@@ -1,3 +1,4 @@
+import 'package:appsenginventory/Controller/clearfunc.dart';
 import 'package:appsenginventory/HomePages/homepagesmenus.dart';
 import 'package:appsenginventory/Registrations/registrationsheaders.dart';
 import 'package:appsenginventory/Registrations/registrationswrappers.dart';
@@ -83,29 +84,30 @@ class _RegistrationsMenuState extends State<RegistrationsMenu> {
             icon: const Icon(Icons.warning_amber,
                 color: Colors.deepOrange),
             title: const Text(
-              "Attentions!",
+              "PERHATIAN!",
               style: TextStyle(
                 color: Colors.blue,
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            content: const Text("ARE YOU SURE WANT TO EXIT WITHOUT SAVE"),
+            content: const Text("APAKAH KAMU YAKIN INGIN KELUAR?"),
             actions: <Widget>[
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop(false);
                 },
-                child: const Text("NO",style:
+                child: const Text("TIDAK",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),
               ),
               TextButton(onPressed: (){
-                Get.back();
+                Get.offAll(() => const Homepagesmenus());
+                ClearControllerFunc.clearControllers();
                 //ctr_data().clear_func();
               },
-                child: const Text("YES",style:
+                child: const Text("YA!",style:
                 TextStyle(color: Colors.blueAccent,
                     fontWeight: FontWeight.bold),
                 ),

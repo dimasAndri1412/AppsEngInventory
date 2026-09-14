@@ -55,7 +55,7 @@ class _HeadersCardState extends State<HeadersCard> {
   Widget build(BuildContext context) {
 
     String tanggal = DateFormat(
-      'EEEE, dd MMMM yyyy',
+      'EEEE,\n dd MMMM yyyy',
       'id_ID',
     ).format(now);
 
@@ -89,7 +89,7 @@ class _HeadersCardState extends State<HeadersCard> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children:  [
                 const Text(
-                  "Selamat Datang,",
+                  "Hi!,",
                   style: TextStyle(fontSize:12),
                 ),
                 TextFormField(

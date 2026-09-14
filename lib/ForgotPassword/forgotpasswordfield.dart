@@ -160,7 +160,7 @@ class _ForgotPasswordFieldsState extends State<ForgotPasswordFields> {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return "Password Can not Empty!";
-                      } else if (value != changesPasswordNewPassword.text) {
+                      } else if (value != forgotPasswordNewPassword.text) {
                         return "Password it's not match!";
                       }
                     },

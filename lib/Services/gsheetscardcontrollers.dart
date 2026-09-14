@@ -65,10 +65,6 @@ Future<List<Map<String, dynamic>>> getDataDashboardStok() async {
       }
     }
 
-    for (final data in result) {
-      print(data);
-    }
-
     return result;
   } catch (e) {
     return [];

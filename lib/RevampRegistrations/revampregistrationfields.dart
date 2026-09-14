@@ -518,44 +518,38 @@
               ),
             ),
             const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment:
-              MainAxisAlignment.end,
+            Wrap(
+              alignment: WrapAlignment.end,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 5,
+              runSpacing: 5,
               children: [
-                const Flexible(
-                  child: Text(
-                    "Add Other Registrations",
-                    style: TextStyle(
-                      color:
-                      Color.fromARGB(255, 8, 36, 87,
-                      ),
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                const Text(
+                  "Member Lainya",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Color.fromARGB(255, 8, 36, 87),
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
 
-                const SizedBox(width: 5),
                 FloatingActionButton(
                   onPressed: addNewsContainers,
-                  heroTag: "add_$index",
-                  backgroundColor: const Color.fromARGB(255, 8, 36, 87,
-                  ),
+                  heroTag: null,
+                  mini: true,
+                  backgroundColor: const Color.fromARGB(255, 8, 36, 87),
                   child: const Icon(
                     Icons.add,
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(width: 5),
+
                 FloatingActionButton(
-                  onPressed: revampResgistControllerss
-                      .length > 1 ? removeRegistContainer
-                      : null,
-                  heroTag: "delete_$index",
-                  backgroundColor: revampResgistControllerss
-                      .length > 1
-                      ? Colors.red
-                      : Colors.grey,
+                  onPressed: removeRegistContainer,
+                  heroTag: null,
+                  mini: true,
+                  backgroundColor: Colors.red,
                   child: const Icon(
                     Icons.delete,
                     color: Colors.white,

@@ -26,13 +26,14 @@ class _RegistrationsFieldappsState extends State<RegistrationsFieldapps> {
 
   @override
   void initState() {
-    super.initState();
-    frontNameController.addListener(updateFullNames);
-    backNameController.addListener(updateFullNames);
-    birthdatecontroller.clear();
-    dropDownValues = "";
-    getListsPosisi();
-    generateEmployeeID();
+  super.initState();
+
+  frontNameController.addListener(updateFullNames);
+  backNameController.addListener(updateFullNames);
+  dropDownValues = "";
+
+  getListsPosisi();
+  generateEmployeeID();
   }
 
   @override
@@ -177,7 +178,7 @@ class _RegistrationsFieldappsState extends State<RegistrationsFieldapps> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Form(
-          key: formKeys,
+          key: formRegistKeys,
           child: Column(
             children: <Widget>[
               Container(
@@ -470,33 +471,43 @@ class _RegistrationsFieldappsState extends State<RegistrationsFieldapps> {
                       color: Color(0xff2457A6),
                     ),
                   ),
-                ) : DropdownButtonFormField<
-                    String>(
-                  value: positionListings.any((posisi) =>
-                    posisi.positionNames == positionscontrollers.text.trim(),
-                  ) ? positionscontrollers.text.trim() : null,
+                ) : DropdownButtonFormField<String>(
+                  isExpanded: true,
 
-                  hint: const Text("-- Select Your Position --",
+                  value: positionListings.any(
+                        (posisi) =>
+                    posisi.positionNames ==
+                        positionscontrollers.text.trim(),
+                  )
+                      ? positionscontrollers.text.trim()
+                      : null,
+
+                  hint: const Text(
+                    "-- Select Your Position --",
                     style: TextStyle(
                       color: Colors.black26,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
 
                   items: positionListings.map((posisi) {
-                      return DropdownMenuItem<String>(
-                        value: posisi.positionNames,
-                        child: Text(
-                          posisi.positionNames,
-                        ),
-                      );
-                    },
-                  ).toList(),
+                    return DropdownMenuItem<String>(
+                      value: posisi.positionNames,
+                      child: Text(
+                        posisi.positionNames,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     prefixIcon: Icon(
                       Icons.work,
                     ),
                   ),
+
                   onChanged: (value) {
                     if (value == null || value.trim().isEmpty) {
                       positionscontrollers.clear();
@@ -505,11 +516,14 @@ class _RegistrationsFieldappsState extends State<RegistrationsFieldapps> {
                       setState(() {});
                       return;
                     }
+
                     final selectedPosition = value.trim();
                     final passwordValue = functionKeys.generatedPassword();
+
                     positionscontrollers.text = selectedPosition;
                     rolesController.text = "ADMIN";
                     passcontroller.text = passwordValue;
+
                     setState(() {});
                   },
                 ),
