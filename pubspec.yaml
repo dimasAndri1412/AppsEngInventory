@@ -125,6 +125,7 @@ flutter:
       - lib/assets/images/otp_verfication.png
       - lib/assets/images/DG_Icons.png
       - lib/assets/Files/gsheetsproects-613d6eb9ccc1.json
+      - lib/assets/Files/Daftar_Alat_Lemari_Basment2.xlsx
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
