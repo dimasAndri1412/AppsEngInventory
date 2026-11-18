@@ -1,9 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 import 'gsheetsservices.dart';
 
 class GsheetsInsertBarangMasuk {
-
   String? revampKodeBarangMasuk;
   String? revampTanggalBarangMasuk;
   String? revampNamaBarangMasuk;
@@ -13,68 +12,60 @@ class GsheetsInsertBarangMasuk {
   String? revampLemariBarangMasuk;
   String? revampKeteranganBarangMasuk;
 
-
   Future<void> revampInsertBarangMasuk() async {
-
-    if (GSheetsServicesEmployees.sheetsBarangMasuk == null) {
-      debugPrint("Sheet NULL, melakukan init...");
+    try {
       await GSheetsServicesEmployees.init();
-    }
 
-    if (GSheetsServicesEmployees.sheetsBarangMasuk == null) {
-      throw Exception(
-        "Google Sheets gagal diinisialisasi.",
-      );
-    }
+      final worksheet =
+          GSheetsServicesEmployees.sheetsBarangMasuk;
 
-    final employeeSheet =
-    GSheetsServicesEmployees.sheetsBarangMasuk!;
-
-    final List<String> row = [
-      revampTanggalBarangMasuk?.trim() ?? '',
-      revampKodeBarangMasuk?.trim() ?? '',
-      revampNamaBarangMasuk?.trim() ?? '',
-      revampJumlahBarangMasuk?.trim() ?? '',
-      revampSatuanBarangMasuk?.trim() ?? '',
-      revampPICBarangMasuk?.trim() ?? '',
-      revampLemariBarangMasuk?.trim() ?? '',
-      revampKeteranganBarangMasuk?.trim() ?? ''
-    ];
-
-    final existingRows = await employeeSheet.values.allRows();
-
-    int lastDataRow = 0;
-
-    for (int i = 0; i < existingRows.length; i++) {
-      final currentRow = existingRows[i];
-
-      final hasData = currentRow.any(
-            (value) => value.trim().isNotEmpty,
-      );
-
-      if (hasData) {
-        lastDataRow = i + 1;
+      if (worksheet == null) {
+        throw Exception(
+          'Worksheet Barang Masuk tidak ditemukan.',
+        );
       }
+
+      final kode = revampKodeBarangMasuk?.trim() ?? '';
+      final tanggal = revampTanggalBarangMasuk?.trim() ?? '';
+      final nama = revampNamaBarangMasuk?.trim() ?? '';
+      final jumlah = revampJumlahBarangMasuk?.trim() ?? '';
+      final satuan = revampSatuanBarangMasuk?.trim() ?? '';
+      final pic = revampPICBarangMasuk?.trim() ?? '';
+      final lemari = revampLemariBarangMasuk?.trim() ?? '';
+      final keterangan =
+          revampKeteranganBarangMasuk?.trim() ?? '';
+
+      if (kode.isEmpty ||
+          tanggal.isEmpty ||
+          nama.isEmpty ||
+          jumlah.isEmpty ||
+          satuan.isEmpty ||
+          pic.isEmpty ||
+          lemari.isEmpty ||
+          keterangan.isEmpty) {
+        throw Exception(
+          'Data barang masuk belum lengkap untuk kode $kode.',
+        );
+      }
+
+      final row = <String>[
+        kode,
+        tanggal,
+        nama,
+        jumlah,
+        satuan,
+        pic,
+        lemari,
+        keterangan,
+      ];
+
+      await worksheet.values.appendRow(row);
+
+      debugPrint('INSERT BARANG MASUK BERHASIL: $kode');
+    } catch (e, stackTrace) {
+      debugPrint('ERROR INSERT BARANG MASUK: $e');
+      debugPrint('$stackTrace');
+      rethrow;
     }
-
-    if (lastDataRow < 1) {
-      lastDataRow = 1;
-    }
-
-    final insertRowNumber = lastDataRow + 1;
-    final result = await employeeSheet.values.insertRow(
-      insertRowNumber,
-      row,
-    );
-
-    debugPrint(
-      "HASIL INSERT: $result",
-    );
-    debugPrint("======================================");
-    debugPrint("INSERT GOOGLE SHEETS BERHASIL");
-    debugPrint(
-      "ROW: $insertRowNumber",
-    );
-    debugPrint("======================================");
   }
 }

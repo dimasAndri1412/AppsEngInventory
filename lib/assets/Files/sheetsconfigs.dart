@@ -22,4 +22,5 @@ class GsheetsConfigs {
   static const String workSheetsBarangMasuk = 'BARANG_MASUK';
   static const String workSheetsBarangKeluar = 'BARANG_KELUAR';
   static const String workSheetsDashBoard = 'DASHBOARD';
+  static const String workSheetsPicture = 'PICTURE';
 }

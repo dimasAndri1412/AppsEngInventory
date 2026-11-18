@@ -302,12 +302,35 @@ Future<List<Map<String, dynamic>>> validationLogins() async {
 // list lemari 1
 Future<List<Map<String, String>>> getListDataBarangLemari1() async {
   final worksheet = GSheetsServicesEmployees.sheetsLemari1;
+  final pictBarang = GSheetsServicesEmployees.sheetsPicture;
 
   if (worksheet == null) {
     throw Exception('sheetLemari belum diinisialisasi.');
   }
 
   try {
+
+    final Map<String, String> pictureMap = {};
+
+    if (pictBarang != null) {
+      final pictRows = await pictBarang.values.allRows();
+      if (pictRows.length > 1) {
+
+        for (var row in pictRows.skip(1)) {
+          if (row.length >= 6) {
+            final kode = row[3].trim();
+            final kodes = row[2].trim();
+            final url = row[5].trim();
+
+            if (kode.isNotEmpty && kodes == 'Lemari1' && url.isNotEmpty) {
+              pictureMap[kode] = _getGoogleDriveDirectUrl(url);
+            }
+          }
+        }
+      }
+    }
+
+
     final rows = await worksheet.values.allRows();
 
     if (rows.length < 3) return [];
@@ -318,20 +341,21 @@ Future<List<Map<String, String>>> getListDataBarangLemari1() async {
     final stockAkhirIndex = header.indexWhere((h) => h.toString().trim() == 'Stok Akhir');
     final statusIndex = header.indexWhere((h) => h.toString().trim() == 'Status');
 
-
     if (namaBarangIndex == -1 || kodeBarangIndex == -1 || satuanIndex == -1
-        || stockAkhirIndex == -1 || statusIndex == -1 ) {
+        || stockAkhirIndex == -1 || statusIndex == -1) {
       throw Exception("Kolom 'Nama Barang' atau 'Kode Barang' tidak ditemukan.");
     }
 
     final result = rows.skip(3).map((row) {
+      final kodeBarang = row.length > kodeBarangIndex ? row[kodeBarangIndex].trim() : "";
+
+      final urlFoto = pictureMap[kodeBarang] ?? "";
+
       return {
         "Nama Barang": row.length > namaBarangIndex
             ? row[namaBarangIndex].trim()
             : "",
-        "Kode Barang": row.length > kodeBarangIndex
-            ? row[kodeBarangIndex].trim()
-            : "",
+        "Kode Barang": kodeBarang,
         "Satuan": row.length > satuanIndex
             ? row[satuanIndex].trim()
             : "",
@@ -341,6 +365,8 @@ Future<List<Map<String, String>>> getListDataBarangLemari1() async {
         "Status": row.length > statusIndex
             ? row[statusIndex].trim()
             : "",
+        "Url Foto": urlFoto,
+        "Lokasi": "Lemari1",
       };
     }).where((e) => e["Nama Barang"]!.isNotEmpty).toList();
 
@@ -351,15 +377,172 @@ Future<List<Map<String, String>>> getListDataBarangLemari1() async {
   }
 }
 
+String _getGoogleDriveDirectUrl(String originalUrl) {
+  if (originalUrl.isEmpty) return '';
+
+  final RegExp regExp = RegExp(r'/d/([a-zA-Z0-9_-]+)');
+  final match = regExp.firstMatch(originalUrl);
+
+  if (match != null && match.groupCount >= 1) {
+    final fileId = match.group(1);
+    return 'https://lh3.googleusercontent.com/d/$fileId';
+  }
+
+  final RegExp idRegExp = RegExp(r'id=([a-zA-Z0-9_-]+)');
+  final idMatch = idRegExp.firstMatch(originalUrl);
+  if (idMatch != null && idMatch.groupCount >= 1) {
+    final fileId = idMatch.group(1);
+    return 'https://lh3.googleusercontent.com/d/$fileId';
+  }
+
+  return originalUrl;
+}
+
+Future<List<Map<String, String>>> getListMinusDataBarang(
+    String lemari,
+    ) async {
+  dynamic worksheet;
+
+  switch (lemari.toLowerCase()) {
+    case 'lemari1':
+      worksheet = GSheetsServicesEmployees.sheetsLemari1;
+      break;
+
+    case 'lemari2':
+      worksheet = GSheetsServicesEmployees.sheetsLemari2;
+      break;
+
+    case 'lemari3':
+      worksheet = GSheetsServicesEmployees.sheetsLemari3;
+      break;
+
+    default:
+      throw Exception('Lemari tidak dikenal: $lemari');
+  }
+
+  if (worksheet == null) {
+    throw Exception('$lemari belum diinisialisasi.');
+  }
+
+  try {
+    final rows = await worksheet.values.allRows();
+
+    if (rows.length < 3) {
+      return <Map<String, String>>[];
+    }
+
+    final header = rows[2];
+
+    final namaBarangIndex = header.indexWhere(
+          (h) => h.toString().trim() == 'Nama Barang',
+    );
+
+    final kodeBarangIndex = header.indexWhere(
+          (h) => h.toString().trim() == 'Kode Barang',
+    );
+
+    final satuanIndex = header.indexWhere(
+          (h) => h.toString().trim() == 'Satuan',
+    );
+
+    final stockAkhirIndex = header.indexWhere(
+          (h) => h.toString().trim() == 'Stok Akhir',
+    );
+
+    final statusIndex = header.indexWhere(
+          (h) => h.toString().trim() == 'Status',
+    );
+
+    if (namaBarangIndex == -1 ||
+        kodeBarangIndex == -1 ||
+        satuanIndex == -1 ||
+        stockAkhirIndex == -1 ||
+        statusIndex == -1) {
+      throw Exception(
+        "Kolom 'Nama Barang', 'Kode Barang', 'Satuan', "
+            "'Stok Akhir' atau 'Status' tidak ditemukan.",
+      );
+    }
+
+    final List<Map<String, String>> result = [];
+
+    for (final row in rows.skip(3)) {
+      final namaBarang = row.length > namaBarangIndex
+          ? row[namaBarangIndex].toString().trim()
+          : '';
+
+      final kodeBarang = row.length > kodeBarangIndex
+          ? row[kodeBarangIndex].toString().trim()
+          : '';
+
+      final satuan = row.length > satuanIndex
+          ? row[satuanIndex].toString().trim()
+          : '';
+
+      final stokAkhir = row.length > stockAkhirIndex
+          ? row[stockAkhirIndex].toString().trim()
+          : '';
+
+      final status = row.length > statusIndex
+          ? row[statusIndex].toString().trim()
+          : '';
+
+      final statusUpper = status.toUpperCase();
+
+      if (statusUpper == '⚠ KURANG' ||
+          statusUpper == 'KURANG') {
+        result.add({
+          'Nama Barang': namaBarang,
+          'Kode Barang': kodeBarang,
+          'Satuan': satuan,
+          'Stok Akhir': stokAkhir,
+          'Status': status,
+        });
+      }
+    }
+
+    return result;
+  } catch (e) {
+    debugPrint(
+      'Error getListMinusDataBarang: $e',
+    );
+
+    rethrow;
+  }
+}
+
 // list lemari 2
 Future<List<Map<String, String>>> getListDataBarangLemari2() async {
   final worksheet = GSheetsServicesEmployees.sheetsLemari2;
+  final pictBarang = GSheetsServicesEmployees.sheetsPicture;
 
   if (worksheet == null) {
     throw Exception('sheetLemari belum diinisialisasi.');
   }
 
   try {
+    // ---------------------------------------------------------------------
+    // 1. Ambil & Petakan URL Foto dari sheet Picture (berdasarkan Kode Barang)
+    // ---------------------------------------------------------------------
+    final Map<String, String> pictureMap = {};
+
+    if (pictBarang != null) {
+      final pictRows = await pictBarang.values.allRows();
+      if (pictRows.length > 1) {
+
+        for (var row in pictRows.skip(1)) {
+          if (row.length >= 6) {
+            final kode = row[3].trim();
+            final kodes = row[2].trim();
+            final url = row[5].trim();
+            if (kode.isNotEmpty && kodes == 'Lemari2' && url.isNotEmpty) {
+              pictureMap[kode] = _getGoogleDriveDirectUrl(url);
+            }
+          }
+        }
+      }
+    }
+
     final rows = await worksheet.values.allRows();
 
     if (rows.length < 3) return [];
@@ -370,20 +553,21 @@ Future<List<Map<String, String>>> getListDataBarangLemari2() async {
     final stockAkhirIndex = header.indexWhere((h) => h.toString().trim() == 'Stok Akhir');
     final statusIndex = header.indexWhere((h) => h.toString().trim() == 'Status');
 
-
     if (namaBarangIndex == -1 || kodeBarangIndex == -1 || satuanIndex == -1
-        || stockAkhirIndex == -1 || statusIndex == -1 ) {
+        || stockAkhirIndex == -1 || statusIndex == -1) {
       throw Exception("Kolom 'Nama Barang' atau 'Kode Barang' tidak ditemukan.");
     }
 
     final result = rows.skip(3).map((row) {
+      final kodeBarang = row.length > kodeBarangIndex ? row[kodeBarangIndex].trim() : "";
+
+      final urlFoto = pictureMap[kodeBarang] ?? "";
+
       return {
         "Nama Barang": row.length > namaBarangIndex
             ? row[namaBarangIndex].trim()
             : "",
-        "Kode Barang": row.length > kodeBarangIndex
-            ? row[kodeBarangIndex].trim()
-            : "",
+        "Kode Barang": kodeBarang,
         "Satuan": row.length > satuanIndex
             ? row[satuanIndex].trim()
             : "",
@@ -393,6 +577,8 @@ Future<List<Map<String, String>>> getListDataBarangLemari2() async {
         "Status": row.length > statusIndex
             ? row[statusIndex].trim()
             : "",
+        "Url Foto": urlFoto,
+        "Lokasi": "Lemari2",
       };
     }).where((e) => e["Nama Barang"]!.isNotEmpty).toList();
 
@@ -485,12 +671,34 @@ Future<bool> validationEmailAndUserNameFirstLogin() async {
 // list lemari 3
 Future<List<Map<String, String>>> getListDataBarangLemari3() async {
   final worksheet = GSheetsServicesEmployees.sheetsLemari3;
+  final pictBarang = GSheetsServicesEmployees.sheetsPicture;
 
   if (worksheet == null) {
     throw Exception('sheetLemari belum diinisialisasi.');
   }
 
   try {
+
+    final Map<String, String> pictureMap = {};
+
+    if (pictBarang != null) {
+      final pictRows = await pictBarang.values.allRows();
+      if (pictRows.length > 1) {
+
+        for (var row in pictRows.skip(1)) {
+          if (row.length >= 6) {
+            final kode = row[3].trim();
+            final kodes = row[2].trim();
+            final url = row[5].trim();
+            if (kode.isNotEmpty && kodes == 'Lemari3' && url.isNotEmpty) {
+              pictureMap[kode] = _getGoogleDriveDirectUrl(url);
+            }
+          }
+        }
+      }
+    }
+
+
     final rows = await worksheet.values.allRows();
 
     if (rows.length < 3) return [];
@@ -501,20 +709,21 @@ Future<List<Map<String, String>>> getListDataBarangLemari3() async {
     final stockAkhirIndex = header.indexWhere((h) => h.toString().trim() == 'Stok Akhir');
     final statusIndex = header.indexWhere((h) => h.toString().trim() == 'Status');
 
-
     if (namaBarangIndex == -1 || kodeBarangIndex == -1 || satuanIndex == -1
-        || stockAkhirIndex == -1 || statusIndex == -1 ) {
+        || stockAkhirIndex == -1 || statusIndex == -1) {
       throw Exception("Kolom 'Nama Barang' atau 'Kode Barang' tidak ditemukan.");
     }
 
     final result = rows.skip(3).map((row) {
+      final kodeBarang = row.length > kodeBarangIndex ? row[kodeBarangIndex].trim() : "";
+
+      final urlFoto = pictureMap[kodeBarang] ?? "";
+
       return {
         "Nama Barang": row.length > namaBarangIndex
             ? row[namaBarangIndex].trim()
             : "",
-        "Kode Barang": row.length > kodeBarangIndex
-            ? row[kodeBarangIndex].trim()
-            : "",
+        "Kode Barang": kodeBarang,
         "Satuan": row.length > satuanIndex
             ? row[satuanIndex].trim()
             : "",
@@ -524,6 +733,8 @@ Future<List<Map<String, String>>> getListDataBarangLemari3() async {
         "Status": row.length > statusIndex
             ? row[statusIndex].trim()
             : "",
+        "Url Foto": urlFoto,
+        "Lokasi": "Lemari3",
       };
     }).where((e) => e["Nama Barang"]!.isNotEmpty).toList();
 
@@ -1189,7 +1400,7 @@ Future<List<Map<String, dynamic>>> validationCountAdmin() async {
   print('Jumlah ADMIN: $jumlahAdmin');
 
   // Jika ADMIN lebih dari 2
-  if (jumlahAdmin == 2) {
+  if (jumlahAdmin == 6) {
     Get.snackbar(
       'Akses Ditolak', 'Jumlah ADMIN sudah lebih dari 2.',
       snackPosition: SnackPosition.BOTTOM,

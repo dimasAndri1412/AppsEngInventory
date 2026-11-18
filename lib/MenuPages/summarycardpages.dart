@@ -2,6 +2,7 @@ import 'package:appsenginventory/Services/gsheetscardcontrollers.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import '../Controller/key.dart';
+import '../Services/gsheetscontrollers.dart';
 import 'summarycard.dart';
 
 class SummaryCardPages extends StatefulWidget {
@@ -193,6 +194,113 @@ class _SummaryCardPagesState extends State<SummaryCardPages> {
     return '0';
   }
 
+  Future<void> showListBarangKurang() async {
+    try {
+      final data = await getListMinusDataBarang(widget.lemari);
+
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(
+              'Barang Kurang - ${widget.lemari}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Color(0xff17346E),
+              ),
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              height: 400,
+              child: data.isEmpty
+                  ? const Center(
+                child: Text(
+                  'Tidak ada barang yang kurang.',
+                  style: TextStyle(
+                    color: Colors.grey,
+                  ),
+                ),
+              ) : ListView.separated(
+                itemCount: data.length,
+                separatorBuilder: (context, index) {
+                  return const Divider();
+                },
+                itemBuilder: (context, index) {
+                  final item = data[index];
+
+                  return ListTile(
+                    contentPadding: EdgeInsets.zero,
+
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.red.withOpacity(0.1),
+                      child: const Icon(
+                        Icons.warning_amber_rounded,
+                        color: Colors.red,
+                      ),
+                    ),
+
+                    title: Text(
+                      item["Nama Barang"] ?? '',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    subtitle: Text(
+                      'Kode: ${item["Kode Barang"] ?? ""}\n'
+                          'Satuan: ${item["Satuan"] ?? ""}',
+                    ),
+
+                    trailing: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text(
+                          'Stok',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          item["Stok Akhir"] ?? '0',
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Tutup'),
+              ),
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal mengambil data barang kurang: $e',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -269,13 +377,16 @@ class _SummaryCardPagesState extends State<SummaryCardPages> {
                 color: Colors.blue,
               ),
 
-              SummaryCard(
-                title: "Jumlah Barang Kurang",
-                value: getControllerValue('kurang'),
-                unit: "Pcs",
-                icon: Icons.all_inbox,
-                color: Colors.red,
-              ),
+              GestureDetector(
+                onTap: showListBarangKurang,
+                child: SummaryCard(
+                  title: "Jumlah Barang Kurang",
+                  value: getControllerValue('kurang'),
+                  unit: "Pcs",
+                  icon: Icons.all_inbox,
+                  color: Colors.red,
+                ),
+              )
             ],
           ),
 

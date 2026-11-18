@@ -46,7 +46,7 @@ dependencies:
   printing: ^5.12.0
   image_picker: ^1.1.2
   image: ^4.1.3
-  #camera: ^0.10.5+9
+  camera: ^0.10.5+9
   # quickalert: ^1.1.0
   #google_ml_kit: ^0.16.0
   #google_mlkit_face_detection: ^0.9.0
@@ -60,6 +60,7 @@ dependencies:
   syncfusion_flutter_charts: ^25.1.42+1
   dio: ^5.4.3+1
   http: ^1.2.1
+  googleapis: ^11.4.0
   googleapis_auth: ^1.6.0
   shared_preferences: ^2.2.3
   get: ^4.6.6
@@ -81,6 +82,7 @@ dependencies:
   fl_chart: ^0.68.0
   gsheets: ^0.5.0
   flutter_dotenv: ^6.0.1
+  google_sign_in: ^6.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -124,7 +126,7 @@ flutter:
       - lib/assets/images/forgot-account-password.png
       - lib/assets/images/otp_verfication.png
       - lib/assets/images/DG_Icons.png
-      - lib/assets/Files/gsheetsproects-613d6eb9ccc1.json
+      - lib/assets/Files/gsheetsproects-86cf2c85d624.json
       - lib/assets/Files/Daftar_Alat_Lemari_Basment2.xlsx
 
   # The following line ensures that the Material Icons font is

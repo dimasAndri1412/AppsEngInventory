@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'AddPictureDetailBarang/addpictwrapper.dart';
 
-class DetailBarang extends StatelessWidget {
+
+class DetailBarang extends StatefulWidget {
   final Map<String, String> barang;
 
   const DetailBarang({
@@ -9,33 +11,38 @@ class DetailBarang extends StatelessWidget {
     required this.barang,
   });
 
+  @override
+  State<DetailBarang> createState() => _DetailBarangState();
+}
+
+class _DetailBarangState extends State<DetailBarang> {
   Color statusColor(String status) {
     switch (status.toLowerCase()) {
-      case "AMAN":return Colors.green;
-      case "⚠ KURANG":return Colors.red;
-      default:return Colors.orange;
+      case "aman":
+        return Colors.green;
+      case "⚠ kurang":
+      case "kurang":
+        return Colors.red;
+      default:
+        return Colors.orange;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final status = barang["Status"] ?? "";
+    final status = widget.barang["Status"] ?? "";
+
     return Scaffold(
       backgroundColor: const Color(0xffF4F6FA),
       body: SafeArea(
         child: Column(
           children: [
+            // Header
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 15,
-                vertical: 15,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xff17346E),
-                    Color(0xff2457A6),
-                  ],
+                  colors: [Color(0xff17346E), Color(0xff2457A6)],
                 ),
                 borderRadius: BorderRadius.only(
                   bottomLeft: Radius.circular(30),
@@ -46,9 +53,7 @@ class DetailBarang extends StatelessWidget {
                 children: [
                   IconButton(
                     onPressed: Get.back,
-                    icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
                   ),
                   const Expanded(
                     child: Text(
@@ -57,7 +62,7 @@ class DetailBarang extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: 25,
                       ),
                     ),
                   ),
@@ -69,57 +74,23 @@ class DetailBarang extends StatelessWidget {
                 padding: const EdgeInsets.all(18),
                 child: Column(
                   children: [
-
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          child: const Icon(
-                            Icons.inventory_2,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(width: 15),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment:
-                            CrossAxisAlignment.start,
-                            children: [
-
-                              Text(
-                                barang["Nama Barang"] ?? "",
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                              Text(
-                                barang["Kode Barang"] ?? "",
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    // PANGGIL WRAPPER DI SINI
+                    AddPictDetailBarangWrapper(
+                      barang: widget.barang,
+                      onImageUpdated: (newUrl) {
+                        setState(() {
+                          widget.barang["Url Foto"] = newUrl;
+                        });
+                      },
                     ),
                     const SizedBox(height: 20),
+                    // Bagian informasi stok & keterangan lainnya...
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                             color: Colors.black12,
                             blurRadius: 6,
@@ -128,27 +99,18 @@ class DetailBarang extends StatelessWidget {
                         ],
                       ),
                       child: Column(
-                        crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            "Stok Saat Ini",
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
+                          Text("Stok Saat Ini", style: TextStyle(color: Colors.grey.shade600)),
                           const SizedBox(height: 10),
                           Row(
-                            mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-
                               RichText(
                                 text: TextSpan(
                                   children: [
                                     TextSpan(
-                                      text:
-                                      "${barang["Stok Akhir"] ?? "0"} ",
+                                      text: "${widget.barang["Stok Akhir"] ?? "0"} ",
                                       style: const TextStyle(
                                         color: Colors.green,
                                         fontSize: 28,
@@ -156,27 +118,17 @@ class DetailBarang extends StatelessWidget {
                                       ),
                                     ),
                                     TextSpan(
-                                      text:
-                                      barang["Satuan"] ?? "",
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                      ),
+                                      text: widget.barang["Satuan"] ?? "",
+                                      style: const TextStyle(color: Colors.black, fontSize: 16),
                                     ),
                                   ],
                                 ),
                               ),
                               Container(
-                                padding:
-                                const EdgeInsets.symmetric(
-                                  horizontal: 15,
-                                  vertical: 6,
-                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color:
-                                  statusColor(status).withOpacity(0.15),
-                                  borderRadius:
-                                  BorderRadius.circular(20),
+                                  color: statusColor(status).withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Text(
                                   status,
@@ -192,17 +144,11 @@ class DetailBarang extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    infoRow("Lokasi", barang["Lokasi"] ?? ""),
+                    infoRow("Lokasi", widget.barang["Lokasi"] ?? ""),
                     const SizedBox(height: 20),
-
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Keterangan",
-                        style: TextStyle(
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
+                      child: Text("Keterangan", style: TextStyle(color: Colors.grey.shade600)),
                     ),
                     const SizedBox(height: 8),
                     Container(
@@ -212,8 +158,7 @@ class DetailBarang extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(15),
                       ),
-                      child: Text(barang["Keterangan"] ?? "-",
-                      ),
+                      child: Text(widget.barang["Keterangan"] ?? "-"),
                     ),
                   ],
                 ),
@@ -230,23 +175,8 @@ class DetailBarang extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
         children: [
-          Expanded(
-            child: Text(
-              title,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          Expanded(child: Text(title, style: TextStyle(color: Colors.grey.shade600))),
+          Expanded(child: Text(value, textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.bold))),
         ],
       ),
     );

@@ -1,7 +1,7 @@
+import 'package:appsenginventory/assets/Files/sheetsconfigs.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:gsheets/gsheets.dart';
-import 'package:appsenginventory/assets/Files/sheetsconfigs.dart';
 
 class GSheetsServicesEmployees {
   static Spreadsheet? spreadsheetLemariBarang;
@@ -17,40 +17,54 @@ class GSheetsServicesEmployees {
   static Worksheet? sheetDaftarStock;
   static Worksheet? sheetDaftarStock2;
   static Worksheet? sheetDaftarStock3;
+
   static Worksheet? sheetsLemari1;
   static Worksheet? sheetsLemari2;
   static Worksheet? sheetsLemari3;
+
   static Worksheet? sheetsBarangMasuk;
   static Worksheet? sheetsBarangKeluar;
   static Worksheet? sheetsDashboard;
+  static Worksheet? sheetsPicture;
 
   static bool _initialized = false;
+  static Future<void>? _initializing;
+
+  static const String credentialPath =
+      'lib/assets/Files/gsheetsproects-86cf2c85d624.json';
 
   static Future<void> init() async {
-    if (_initialized) {
-      debugPrint(
-        'Google Sheets sudah diinisialisasi.',
-      );
+    if (_initialized) return;
+
+    final pending = _initializing;
+
+    if (pending != null) {
+      await pending;
       return;
     }
 
+    final future = _initInternal();
+    _initializing = future;
+
     try {
+      await future;
+    } finally {
+      if (identical(_initializing, future)) {
+        _initializing = null;
+      }
+    }
+  }
 
-      const credentialPath =
-          'lib/assets/Files/gsheetsproects-613d6eb9ccc1.json';
+  static Future<void> _initInternal() async {
+    try {
+      final credential =
+      await rootBundle.loadString(credentialPath);
 
-      final credential = await rootBundle.loadString(
-        credentialPath,
-      );
-
-      final gsheets = GSheets(
-        credential,
-      );
+      final gsheets = GSheets(credential);
 
       final spreadsheet = await gsheets.spreadsheet(
         GsheetsConfigs.gsheetsID,
       );
-
 
       final employeeSheet = spreadsheet.worksheetByTitle(
         GsheetsConfigs.workSheetsNames,
@@ -84,46 +98,62 @@ class GSheetsServicesEmployees {
         GsheetsConfigs.gsheetsIDDaftarLemari,
       );
 
-
-      spreadsheetLemariBarang = spreadsheetBarang;
-
-
-      final sheetsDaftarStock = spreadsheetBarang.worksheetByTitle(
+      final stock1 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsDaftarStock,
       );
 
-      final sheetsDaftarStock2 = spreadsheetBarang.worksheetByTitle(
+      final stock2 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsDaftarStock2,
       );
 
-      final sheetsDaftarStock3 = spreadsheetBarang.worksheetByTitle(
+      final stock3 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsDaftarStock3,
       );
 
-      final sheetBarangLemari1 = spreadsheetBarang.worksheetByTitle(
+      final lemari1 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsLemari1,
       );
 
-      final sheetBarangLemari2 = spreadsheetBarang.worksheetByTitle(
+      final lemari2 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsLemari2,
       );
 
-      final sheetBarangLemari3 = spreadsheetBarang.worksheetByTitle(
+      final lemari3 = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsLemari3,
       );
 
-      final sheetBarangMasuk = spreadsheetBarang.worksheetByTitle(
+      final barangMasuk = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsBarangMasuk,
       );
 
-      final sheetBarangKeluar = spreadsheetBarang.worksheetByTitle(
+      final barangKeluar = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsBarangKeluar,
       );
 
-      final sheetDashboard = spreadsheetBarang.worksheetByTitle(
+      final dashboard = spreadsheetBarang.worksheetByTitle(
         GsheetsConfigs.workSheetsDashBoard,
       );
 
+      final picture = spreadsheetBarang.worksheetByTitle(
+        GsheetsConfigs.workSheetsPicture,
+      );
+
+      if (barangMasuk == null) {
+        throw Exception(
+          'Worksheet Barang Masuk tidak ditemukan: '
+              '${GsheetsConfigs.workSheetsBarangMasuk}',
+        );
+      }
+
+      if (picture == null) {
+        throw Exception(
+          'Worksheet foto tidak ditemukan: '
+              '${GsheetsConfigs.workSheetsPicture}',
+        );
+      }
+
+      // Tetapkan seluruh referensi setelah pencarian selesai.
+      spreadsheetLemariBarang = spreadsheetBarang;
 
       sheet = employeeSheet;
       sheetPosisi = posisiSheet;
@@ -133,22 +163,27 @@ class GSheetsServicesEmployees {
       sheetOTP = otpCodes;
       sheetNotif = notif;
 
-      sheetDaftarStock = sheetsDaftarStock;
-      sheetDaftarStock2 = sheetsDaftarStock2;
-      sheetDaftarStock3 = sheetsDaftarStock3;
+      sheetDaftarStock = stock1;
+      sheetDaftarStock2 = stock2;
+      sheetDaftarStock3 = stock3;
 
-      sheetsLemari1 = sheetBarangLemari1;
-      sheetsLemari2 = sheetBarangLemari2;
-      sheetsLemari3 = sheetBarangLemari3;
+      sheetsLemari1 = lemari1;
+      sheetsLemari2 = lemari2;
+      sheetsLemari3 = lemari3;
 
-      sheetsBarangMasuk = sheetBarangMasuk;
-      sheetsBarangKeluar = sheetBarangKeluar;
-      sheetsDashboard = sheetDashboard;
+      sheetsBarangMasuk = barangMasuk;
+      sheetsBarangKeluar = barangKeluar;
+      sheetsDashboard = dashboard;
+      sheetsPicture = picture;
 
       _initialized = true;
 
+      debugPrint('Google Sheets berhasil diinisialisasi.');
+    } catch (e, stackTrace) {
+      _initialized = false;
 
-    } catch (e) {
+      debugPrint('GAGAL INISIALISASI GOOGLE SHEETS: $e');
+      debugPrint('$stackTrace');
 
       rethrow;
     }

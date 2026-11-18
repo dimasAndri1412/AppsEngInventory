@@ -1,93 +1,175 @@
+
+import 'dart:io';
+
 import 'package:appsenginventory/Controller/key.dart';
 import 'package:appsenginventory/RevampBarangMasuk/MaterialBarangMasuk/dropdownlistlemari.dart';
 import 'package:appsenginventory/Services/gsheetscontrollers.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+
 import '../RevampRegistrations/MaterialRevampRegistration/funcntions.dart';
 import '../Services/gsheetsservices.dart';
 
 class RevampBarangMasukField extends StatefulWidget {
-  const RevampBarangMasukField({super.key});
+  final Map<String, XFile?> fotoBarangMasukMap;
+
+  const RevampBarangMasukField({
+    super.key,
+    required this.fotoBarangMasukMap,
+  });
 
   @override
-  State<RevampBarangMasukField> createState() => _RevampBarangMasukFieldState();
+  State<RevampBarangMasukField> createState() =>
+      _RevampBarangMasukFieldState();
 }
 
-class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
-
+class _RevampBarangMasukFieldState
+    extends State<RevampBarangMasukField> {
   String? dropDownValues;
   String? dropDownListLemari;
-  int nextKodeSequence = 1;
-  List<Widget> addtionalBarangContainers = [];
-  List<DropDownListLemari> lemariListings = [];
+
+  final List<DropDownListLemari> lemariListings = [];
+  final ImagePicker _imagePicker = ImagePicker();
+
   bool isLoadingPosisi = true;
 
-  void updateStatusBarang(
-      Map<String, TextEditingController> controllersss, String lemari,) {
-    final stokAkhir = int.tryParse(
-      controllersss["totalJumlahAkhir$lemari"]?.text ?? "0",
-    ) ?? 0;
-    final stokMinimum = int.tryParse(
-      controllersss["jumlahMinimumBarangMasuk$lemari"]?.text ?? "0",
-    ) ?? 0;
-    controllersss["statusBarangMasuk$lemari"]?.text =
-    stokAkhir <= stokMinimum ? "⚠ KURANG" : "✓ AMAN";
+  String _fotoKey(
+      Map<String, TextEditingController> controllers,
+      ) {
+    final controller = controllers['kodeBarangMasuk'];
+
+    if (controller == null) {
+      throw StateError(
+        'Controller kodeBarangMasuk tidak ditemukan.',
+      );
+    }
+
+    return identityHashCode(controller).toString();
   }
 
-  Future<void> generateNoBarangMasuk(Map<String, TextEditingController> controllersss,) async {
+  void updateStatusBarang(
+      Map<String, TextEditingController> controllers,
+      String lemari,
+      ) {
+    final stokAkhir = int.tryParse(
+      controllers['totalJumlahAkhir$lemari']?.text ?? '0',
+    ) ??
+        0;
 
-    final index = revampBarangMasukControllerss.indexOf(controllersss);
+    final stokMinimum = int.tryParse(
+      controllers['jumlahMinimumBarangMasuk$lemari']?.text ?? '0',
+    ) ??
+        0;
+
+    controllers['statusBarangMasuk$lemari']?.text =
+    stokAkhir <= stokMinimum ? '⚠ KURANG' : '✓ AMAN';
+  }
+
+  Future<void> pilihFotoBarang(
+      Map<String, TextEditingController> controllers, {
+        required ImageSource source,
+      }) async {
+    try {
+      final foto = await _imagePicker.pickImage(
+        source: source,
+        imageQuality: 75,
+        maxWidth: 1280,
+      );
+
+      if (foto == null || !mounted) return;
+
+      setState(() {
+        widget.fotoBarangMasukMap[_fotoKey(controllers)] = foto;
+      });
+    } catch (e, stackTrace) {
+      debugPrint('GAGAL MENGAMBIL FOTO: $e');
+      debugPrint('$stackTrace');
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal mengambil foto: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> generateNoBarangMasuk(
+      Map<String, TextEditingController> controllers,
+      ) async {
+    final index = revampBarangMasukControllerss.indexOf(controllers);
     final noUrut = index == -1
         ? revampBarangMasukControllerss.length + 1
         : index + 1;
 
-    if ((controllersss["tanggalBarangMasuk"]?.text ?? "").isNotEmpty) {
-      controllersss["nomerUrut"]?.text = noUrut.toString();
+    if ((controllers['tanggalBarangMasuk']?.text ?? '').isNotEmpty) {
+      controllers['nomerUrut']?.text = noUrut.toString();
     } else {
-      controllersss["nomerUrut"]?.clear();
+      controllers['nomerUrut']?.clear();
     }
   }
 
-  Future<void> kodeBarangDanNomerUrutLemari1(Map<String, TextEditingController> controllersss, dynamic worksheet,) async {
+  Future<void> _generateKodeDanNomor(
+      Map<String, TextEditingController> controllers,
+      dynamic worksheet,
+      String fieldNomor,
+      ) async {
     try {
       await GSheetsServicesEmployees.init();
+
+      if (worksheet == null) {
+        throw Exception('Worksheet lemari tidak ditemukan.');
+      }
+
       final rows = await worksheet.values.allRows();
 
       if (rows.isEmpty) {
-        controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(1);
-        controllersss["nomerUrutLemari1"]!.text = "1";
+        controllers['kodeBarangMasuk']!.text =
+            Functions.generatedKodeBarang(1);
+        controllers[fieldNomor]!.text = '1';
         return;
       }
 
       int headerRow = -1;
       int kodeBarangIndex = -1;
-      int nomerUrutIndex = -1;
+      int nomorIndex = -1;
 
       for (int r = 0; r < rows.length; r++) {
         for (int c = 0; c < rows[r].length; c++) {
           final value = rows[r][c].toString().trim().toLowerCase();
-          if (value == "kode barang") {
+
+          if (value == 'kode barang') {
             kodeBarangIndex = c;
-            headerRow = r;
           }
-          if (value == "no") {
-            nomerUrutIndex = c;
-            headerRow = r;
+
+          if (value == 'no') {
+            nomorIndex = c;
           }
         }
 
-        if (kodeBarangIndex != -1 && nomerUrutIndex != -1) {
+        if (kodeBarangIndex != -1 && nomorIndex != -1) {
+          headerRow = r;
           break;
         }
       }
 
+      if (headerRow == -1 ||
+          kodeBarangIndex == -1 ||
+          nomorIndex == -1) {
+        throw Exception(
+          'Header "Kode Barang" atau "No" tidak ditemukan.',
+        );
+      }
+
       int nextKode = 1;
-      int nextUrut = 1;
+      int nextNomor = 1;
 
       for (int i = rows.length - 1; i > headerRow; i--) {
         if (rows[i].length > kodeBarangIndex) {
           final kode = rows[i][kodeBarangIndex].trim();
-
           final match = RegExp(r'^ENG-(\d+)$').firstMatch(kode);
 
           if (match != null) {
@@ -98,285 +180,234 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
       }
 
       for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > nomerUrutIndex) {
-          final nomor = int.tryParse(rows[i][nomerUrutIndex].trim());
+        if (rows[i].length > nomorIndex) {
+          final nomor = int.tryParse(rows[i][nomorIndex].trim());
 
           if (nomor != null) {
-            nextUrut = nomor + 1;
+            nextNomor = nomor + 1;
             break;
           }
         }
       }
-      controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(nextKode);
-      controllersss["nomerUrutLemari1"]!.text = nextUrut.toString();
 
-      if (kodeBarangIndex == -1 || nomerUrutIndex == -1) {
-        debugPrint("Header tidak ditemukan");
-        debugPrint("Header row yang terbaca:");
-        for (int i = 0; i < rows.length && i < 5; i++) {
-          debugPrint("Row $i : ${rows[i]}");
-        }
-        return;
+      controllers['kodeBarangMasuk']!.text =
+          Functions.generatedKodeBarang(nextKode);
+      controllers[fieldNomor]!.text = nextNomor.toString();
+    } catch (e, stackTrace) {
+      debugPrint('ERROR GENERATE KODE DAN NOMOR: $e');
+      debugPrint('$stackTrace');
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Gagal membuat kode barang: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
-    } catch (e, s) {
-      debugPrint("Error generate kode barang & nomor urut: $e");
-      debugPrint("$s");
     }
   }
 
-  Future<void> kodeBarangDanNomerUrutLemari2(Map<String, TextEditingController> controllersss, dynamic worksheet,) async {
-    try {
-      await GSheetsServicesEmployees.init();
-      final rows = await worksheet.values.allRows();
+  Future<void> kodeBarangDanNomerUrutLemari1(
+      Map<String, TextEditingController> controllers,
+      dynamic worksheet,
+      ) =>
+      _generateKodeDanNomor(controllers, worksheet, 'nomerUrutLemari1');
 
-      if (rows.isEmpty) {
-        controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(1);
-        controllersss["nomerUrutLemari2"]!.text = "1";
-        return;
-      }
+  Future<void> kodeBarangDanNomerUrutLemari2(
+      Map<String, TextEditingController> controllers,
+      dynamic worksheet,
+      ) =>
+      _generateKodeDanNomor(controllers, worksheet, 'nomerUrutLemari2');
 
-      int headerRow = -1;
-      int kodeBarangIndex = -1;
-      int nomerUrutIndex = -1;
-
-      for (int r = 0; r < rows.length; r++) {
-        for (int c = 0; c < rows[r].length; c++) {
-          final value = rows[r][c].toString().trim().toLowerCase();
-          if (value == "kode barang") {
-            kodeBarangIndex = c;
-            headerRow = r;
-          }
-          if (value == "no") {
-            nomerUrutIndex = c;
-            headerRow = r;
-          }
-        }
-
-        if (kodeBarangIndex != -1 && nomerUrutIndex != -1) {
-          break;
-        }
-      }
-
-      int nextKode = 1;
-      int nextUrut = 1;
-
-      for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > kodeBarangIndex) {
-          final kode = rows[i][kodeBarangIndex].trim();
-
-          final match = RegExp(r'^ENG-(\d+)$').firstMatch(kode);
-
-          if (match != null) {
-            nextKode = int.parse(match.group(1)!) + 1;
-            break;
-          }
-        }
-      }
-
-      for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > nomerUrutIndex) {
-          final nomor = int.tryParse(rows[i][nomerUrutIndex].trim());
-
-          if (nomor != null) {
-            nextUrut = nomor + 1;
-            break;
-          }
-        }
-      }
-      controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(nextKode);
-      controllersss["nomerUrutLemari2"]!.text = nextUrut.toString();
-
-      if (kodeBarangIndex == -1 || nomerUrutIndex == -1) {
-        debugPrint("Header tidak ditemukan");
-        debugPrint("Header row yang terbaca:");
-        for (int i = 0; i < rows.length && i < 5; i++) {
-          debugPrint("Row $i : ${rows[i]}");
-        }
-        return;
-      }
-    } catch (e, s) {
-      debugPrint("Error generate kode barang & nomor urut: $e");
-      debugPrint("$s");
-    }
-  }
-
-  Future<void> kodeBarangDanNomerUrutLemari3(Map<String, TextEditingController> controllersss, dynamic worksheet,) async {
-    try {
-      await GSheetsServicesEmployees.init();
-      final rows = await worksheet.values.allRows();
-
-      if (rows.isEmpty) {
-        controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(1);
-        controllersss["nomerUrutLemari3"]!.text = "1";
-        return;
-      }
-
-      int headerRow = -1;
-      int kodeBarangIndex = -1;
-      int nomerUrutIndex = -1;
-
-      for (int r = 0; r < rows.length; r++) {
-        for (int c = 0; c < rows[r].length; c++) {
-          final value = rows[r][c].toString().trim().toLowerCase();
-          if (value == "kode barang") {
-            kodeBarangIndex = c;
-            headerRow = r;
-          }
-          if (value == "no") {
-            nomerUrutIndex = c;
-            headerRow = r;
-          }
-        }
-
-        if (kodeBarangIndex != -1 && nomerUrutIndex != -1) {
-          break;
-        }
-      }
-
-      int nextKode = 1;
-      int nextUrut = 1;
-
-      for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > kodeBarangIndex) {
-          final kode = rows[i][kodeBarangIndex].trim();
-
-          final match = RegExp(r'^ENG-(\d+)$').firstMatch(kode);
-
-          if (match != null) {
-            nextKode = int.parse(match.group(1)!) + 1;
-            break;
-          }
-        }
-      }
-
-      for (int i = rows.length - 1; i > headerRow; i--) {
-        if (rows[i].length > nomerUrutIndex) {
-          final nomor = int.tryParse(rows[i][nomerUrutIndex].trim());
-
-          if (nomor != null) {
-            nextUrut = nomor + 1;
-            break;
-          }
-        }
-      }
-      controllersss["kodeBarangMasuk"]!.text = Functions.generatedKodeBarang(nextKode);
-      controllersss["nomerUrutLemari3"]!.text = nextUrut.toString();
-
-      if (kodeBarangIndex == -1 || nomerUrutIndex == -1) {
-        debugPrint("Header tidak ditemukan");
-        debugPrint("Header row yang terbaca:");
-        for (int i = 0; i < rows.length && i < 5; i++) {
-          debugPrint("Row $i : ${rows[i]}");
-        }
-        return;
-      }
-    } catch (e, s) {
-      debugPrint("Error generate kode barang & nomor urut: $e");
-      debugPrint("$s");
-    }
-  }
+  Future<void> kodeBarangDanNomerUrutLemari3(
+      Map<String, TextEditingController> controllers,
+      dynamic worksheet,
+      ) =>
+      _generateKodeDanNomor(controllers, worksheet, 'nomerUrutLemari3');
 
   Map<String, TextEditingController> createBarangMasukControllers() {
-
     return {
-      "nomerUrutLemari1": TextEditingController(),
-      "nomerUrutLemari2": TextEditingController(),
-      "nomerUrutLemari3": TextEditingController(),
+      'nomerUrutLemari1': TextEditingController(),
+      'nomerUrutLemari2': TextEditingController(),
+      'nomerUrutLemari3': TextEditingController(),
 
-      "totalBarangMasukLemari1": TextEditingController(),
-      "totalBarangKeluarLemari1": TextEditingController(),
-      "totalJumlahAkhirLemari1": TextEditingController(),
-      "jumlahMinimumBarangMasukLemari1": TextEditingController(),
-      "statusBarangMasukLemari1": TextEditingController(),
+      'totalBarangMasukLemari1': TextEditingController(),
+      'totalBarangKeluarLemari1': TextEditingController(),
+      'totalJumlahAkhirLemari1': TextEditingController(),
+      'jumlahMinimumBarangMasukLemari1': TextEditingController(),
+      'statusBarangMasukLemari1': TextEditingController(),
 
+      'totalBarangMasukLemari2': TextEditingController(),
+      'totalBarangKeluarLemari2': TextEditingController(),
+      'totalJumlahAkhirLemari2': TextEditingController(),
+      'jumlahMinimumBarangMasukLemari2': TextEditingController(),
+      'statusBarangMasukLemari2': TextEditingController(),
 
-      "totalBarangMasukLemari2": TextEditingController(),
-      "totalBarangKeluarLemari2": TextEditingController(),
-      "totalJumlahAkhirLemari2": TextEditingController(),
-      "jumlahMinimumBarangMasukLemari2": TextEditingController(),
-      "statusBarangMasukLemari2": TextEditingController(),
+      'totalBarangMasukLemari3': TextEditingController(),
+      'totalBarangKeluarLemari3': TextEditingController(),
+      'totalJumlahAkhirLemari3': TextEditingController(),
+      'jumlahMinimumBarangMasukLemari3': TextEditingController(),
+      'statusBarangMasukLemari3': TextEditingController(),
 
-      "totalBarangMasukLemari3": TextEditingController(),
-      "totalBarangKeluarLemari3": TextEditingController(),
-      "totalJumlahAkhirLemari3": TextEditingController(),
-      "jumlahMinimumBarangMasukLemari3": TextEditingController(),
-      "statusBarangMasukLemari3": TextEditingController(),
-
-      "nomerUrut": TextEditingController(),
-      "kodeBarangMasuk": TextEditingController(),
-      "tanggalBarangMasuk": TextEditingController(),
-      "namaBarangMasuk": TextEditingController(),
-      "jumlahBarangMasuk": TextEditingController(),
-      "satuanBarangController": TextEditingController(),
-      "picBarangMasuk": TextEditingController(),
-      "lemariBarangMasuk": TextEditingController(),
-      "keteranganBarangMasuk": TextEditingController()
+      'nomerUrut': TextEditingController(),
+      'kodeBarangMasuk': TextEditingController(),
+      'tanggalBarangMasuk': TextEditingController(),
+      'namaBarangMasuk': TextEditingController(),
+      'jumlahBarangMasuk': TextEditingController(),
+      'satuanBarangController': TextEditingController(),
+      'picBarangMasuk': TextEditingController(),
+      'lemariBarangMasuk': TextEditingController(),
+      'keteranganBarangMasuk': TextEditingController(),
     };
   }
 
   Future<void> getListsPosisiLemari() async {
     try {
       await GSheetsServicesEmployees.init();
-
       final results = await getDataLemari();
 
       if (!mounted) return;
 
       setState(() {
-        lemariListings = results.map((data) {
-          return DropDownListLemari(
-            lemariposisi: data['PosisiLemari'] ?? '',
+        lemariListings
+          ..clear()
+          ..addAll(
+            results.map(
+                  (data) => DropDownListLemari(
+                lemariposisi: data['PosisiLemari'] ?? '',
+              ),
+            ),
           );
-        }).toList();
+
         isLoadingPosisi = false;
       });
-    } catch (e) {
-      debugPrint(
-        'Error mengambil data posisi: $e',
-      );
+    } catch (e, stackTrace) {
+      debugPrint('ERROR MENGAMBIL POSISI LEMARI: $e');
+      debugPrint('$stackTrace');
 
       if (!mounted) return;
 
       setState(() {
         isLoadingPosisi = false;
-        lemariListings = [];
+        lemariListings.clear();
       });
     }
   }
 
+  void addNewsContainers() {
+    final controllers = createBarangMasukControllers();
+
+    setState(() {
+      revampBarangMasukControllerss.add(controllers);
+    });
+  }
+
   void removeRegistContainer() {
     if (revampBarangMasukControllerss.isEmpty) return;
+
     setState(() {
       final controllers = revampBarangMasukControllerss.removeLast();
-      for (var controller in controllers.values) {
+
+      widget.fotoBarangMasukMap.remove(_fotoKey(controllers));
+
+      for (final controller in controllers.values) {
         controller.dispose();
       }
     });
   }
 
   @override
+  void initState() {
+    super.initState();
+    getListsPosisiLemari();
+  }
+
+  @override
   void dispose() {
-    for (var controllers in revampBarangMasukControllerss) {
-      for (var controller in controllers.values) {
-        controller.dispose();
-      }
-    }
-    revampBarangMasukControllerss.clear();
+    // Foto yang dipilih dikelola oleh Wrapper, jadi tidak dihapus di sini.
     super.dispose();
   }
 
-
-  void addNewsContainers() {
-    final controllers = createBarangMasukControllers();
-    setState(() {
-      revampBarangMasukControllerss.add(controllers);
-    });
+  Widget startBuildBarangMasukContainers() {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: const [
+          BoxShadow(
+            offset: Offset(0, 4),
+            blurRadius: 10,
+            color: Colors.black26,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          const Expanded(
+            child: Text(
+              'Masukan Barang',
+              style: TextStyle(
+                color: Color.fromARGB(255, 8, 36, 87),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          FloatingActionButton(
+            onPressed: addNewsContainers,
+            heroTag: 'add-first-barang',
+            backgroundColor: const Color.fromARGB(255, 8, 36, 87),
+            child: const Icon(Icons.add, color: Colors.white),
+          ),
+        ],
+      ),
+    );
   }
 
-  Widget startBuildBarangMasukContainers(
-      Map<String, TextEditingController> controlersss) {
+  Widget _textField({
+    required String label,
+    required String controllerKey,
+    required Map<String, TextEditingController> controllers,
+    required String errorText,
+    TextInputType? keyboardType,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    Widget? prefixIcon,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      child: TextFormField(
+        controller: controllers[controllerKey],
+        keyboardType: keyboardType,
+        readOnly: readOnly,
+        onTap: onTap,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const UnderlineInputBorder(),
+          prefixIcon: prefixIcon,
+        ),
+        validator: (value) {
+          if (value == null || value.trim().isEmpty) {
+            return errorText;
+          }
+          return null;
+        },
+      ),
+    );
+  }
+
+  Widget buildsBarangMasukContainers(
+      Map<String, TextEditingController> controllers,
+      int index,
+      ) {
+    final fotoKey = _fotoKey(controllers);
+
     return Container(
-      key: UniqueKey(),
+      key: ValueKey(fotoKey),
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -393,339 +424,308 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Barang Masuk ${index + 1}',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 8, 36, 87),
+            ),
+          ),
+
+          _textField(
+            label: 'Tanggal Barang Masuk',
+            controllerKey: 'tanggalBarangMasuk',
+            controllers: controllers,
+            errorText: 'Tanggal barang masuk tidak boleh kosong!',
+            readOnly: true,
+            prefixIcon: const Icon(Icons.calendar_today),
+            onTap: () async {
+              final selected = await showDatePicker(
+                context: context,
+                initialDate: DateTime.now(),
+                firstDate: DateTime(1950),
+                lastDate: DateTime(2100),
+              );
+
+              if (selected != null && mounted) {
+                controllers['tanggalBarangMasuk']!.text =
+                    DateFormat('yyyy-MM-dd').format(selected);
+                await generateNoBarangMasuk(controllers);
+                if (mounted) setState(() {});
+              }
+            },
+          ),
+
+          _textField(
+            label: 'Nama Barang Masuk',
+            controllerKey: 'namaBarangMasuk',
+            controllers: controllers,
+            errorText: 'Nama barang tidak boleh kosong!',
+            prefixIcon: const Icon(Icons.note_add),
+          ),
+
           Row(
-            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const Text(
-                "Masukan Barang",
-                style: TextStyle(
-                    color: Color.fromARGB(255, 8, 36, 87),
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 10),
-              FloatingActionButton(
-                onPressed: addNewsContainers,
-                heroTag: null,
-                backgroundColor: const Color.fromARGB(255, 8, 36, 87),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
+              Expanded(
+                child: _textField(
+                  label: 'Jumlah',
+                  controllerKey: 'jumlahBarangMasuk',
+                  controllers: controllers,
+                  errorText: 'Jumlah tidak boleh kosong!',
+                  keyboardType: TextInputType.number,
+                  prefixIcon: const Icon(Icons.inventory_2),
                 ),
               ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 5,
+                  ),
+                  child: DropdownButtonFormField<String>(
+                    value: controllers['satuanBarangController']!.text.isEmpty
+                        ? null
+                        : controllers['satuanBarangController']!.text,
+                    decoration: const InputDecoration(
+                      labelText: 'Satuan',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Satuan',
+                        child: Text('Satuan'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'PCS',
+                        child: Text('PCS'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'UNIT',
+                        child: Text('UNIT'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      if (value == null) return;
 
-  Widget buildsBarangMasukContainers(
-      Map<String, TextEditingController> controllersss) {
-    return Container(
-      key: UniqueKey(),
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [
-          BoxShadow(
-            offset: Offset(0, 4),
-            blurRadius: 10,
-            color: Colors.black26,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: const BoxDecoration(
-                border: Border(
-                    bottom: BorderSide(
-                        color: Colors.black87)
-                )
-            ),
-            child: TextFormField(
-              controller: controllersss["tanggalBarangMasuk"],
-              decoration: const InputDecoration(
-                  labelText: "Tanggal Barang Masuk",
-                  hintText: "Silahkan Masukan Tangg Barang Masuk",
-                  hintStyle: TextStyle(color: Colors.black26),
-                  border: InputBorder.none,
-                  icon: Icon(Icons.calendar_today)),
-              readOnly: true,
-              onTap: () async {
-                DateTime? pickedDates = await showDatePicker(
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: const ColorScheme.light(
-                              primary: Colors.lightBlue,
-                              onPrimary: Colors.white,
-                              onSurface: Colors.black),
-                          textButtonTheme: TextButtonThemeData(
-                            style: TextButton.styleFrom(
-                                foregroundColor: Colors.blueAccent),
-                          ),
-                        ),
-                        child: child!,
-                      );
+                      controllers['satuanBarangController']!.text = value;
+                      controllers['picBarangMasuk']!.text =
+                          sideBarFullNameController.text;
+
+                      setState(() {});
                     },
-                    context: context,
-                    initialDate: DateTime.now(),
-                    firstDate: DateTime(1950),
-                    lastDate: DateTime(2100));
-
-                if (pickedDates != null) {
-                  String formatedDates =
-                  DateFormat('yyyy-MM-dd').format(pickedDates);
-                  setState(() {
-                    controllersss["tanggalBarangMasuk"]?.text = formatedDates;
-                  });
-                } else {}
-              },
-              validator: (value) {
-                if (value!.isEmpty) {
-                  return "Tanggal Barang Masuk Tidak Boleh Kosong!";
-                }
-                return null;
-              },
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.black87))),
-            child: TextFormField(
-              controller: controllersss["namaBarangMasuk"],
-              decoration: const InputDecoration(
-                  labelText: "Nama Barang Masuk",
-                  hintText: "Silahkan Masukan Nama Barang Masuk",
-                  hintStyle: TextStyle(color: Colors.black26),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.note_add)),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Nama Barang Masuk Tidak Boleh Kosong!";
-                }
-                return null;
-              },
-            ),
-          ),
-          Row(
-            children: [
-              Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(5),
-                        width: 170,
-                        decoration: const BoxDecoration(
-                          border: Border(
-                            bottom: BorderSide(color: Colors.black87),
-                          ),
-                        ),
-                        child: TextFormField(
-                          controller: controllersss["jumlahBarangMasuk"],
-                          keyboardType: TextInputType.number,
-                          decoration: const InputDecoration(
-                            labelText: "Jumlah",
-                            hintText: "Jumlah",
-                            hintStyle: TextStyle(color: Colors.black26),
-                            border: InputBorder.none,
-                            prefixIcon: Icon(Icons.inventory_2),
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return "Jumlah Barang Masuk Tidak Boleh Kosong!";
-                            }
-                            return null;
-                          },
-                        ),
-                      ),
-                    ],
-                  )
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Pilih satuan!';
+                      }
+                      return null;
+                    },
+                  ),
+                ),
               ),
-              Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                          width: 170,
-                          height: 75,
-                          padding: const EdgeInsets.all(5),
-                          decoration: const BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(color: Colors.black87),
-                            ),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: controllersss["satuanBarangController"]!.text.isNotEmpty
-                                ? controllersss["satuanBarangController"]!.text
-                                : null,
-                            hint: const Text("Pilih"),
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              isDense: true,
-                            ),
-                            items: const [
-                              DropdownMenuItem(value: "Satuan", child: Text("Satuan")),
-                              DropdownMenuItem(value: "PCS", child: Text("PCS")),
-                              DropdownMenuItem(value: "UNIT", child: Text("UNIT")),
-                            ],
-                            onChanged: (value) async {
-
-                              await generateNoBarangMasuk(controllersss);
-                              controllersss["picBarangMasuk"]!.text = sideBarFullNameController.text;
-                              setState(() {
-                                controllersss["satuanBarangController"]!.text = value ?? "";
-                              });
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return "Pilih Satuan!";
-                              }
-                              return null;
-                            },
-                          )
-                      ),
-                    ],
-                  )
-              )
             ],
           ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.black87))),
-            child: TextFormField(
-              controller: controllersss["picBarangMasuk"],
-              readOnly: true,
-              decoration: const InputDecoration(
-                  labelText: "PIC Barang Masuk",
-                  hintText: "Silahkan Masukan PIC Barang Masuk",
-                  hintStyle: TextStyle(color: Colors.black26),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.people)),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "PIC Barang Masuk Tidak Boleh Kosong!";
-                }
-                return null;
-              },
-            ),
+
+          _textField(
+            label: 'PIC Barang Masuk',
+            controllerKey: 'picBarangMasuk',
+            controllers: controllers,
+            errorText: 'PIC barang masuk tidak boleh kosong!',
+            readOnly: true,
+            prefixIcon: const Icon(Icons.people),
           ),
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-              border: Border(
-                bottom: BorderSide(
-                  color: Colors.black87,
-                ),
-              ),
+
+          Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 8,
             ),
-            child: isLoadingPosisi ? const Center(
-              child: Padding(
-                padding: EdgeInsets.all(8),
-                child: CircularProgressIndicator(),
-              ),
-            ) : DropdownButtonFormField<String>(
-              value: lemariListings.map((posisi) => posisi.lemariposisi,)
-                  .contains(controllersss["lemariBarangMasuk"]?.text,)
-                  ? controllersss["lemariBarangMasuk"]?.text
+            child: isLoadingPosisi
+                ? const Center(child: CircularProgressIndicator())
+                : DropdownButtonFormField<String>(
+              value: lemariListings
+                  .map((item) => item.lemariposisi)
+                  .contains(
+                controllers['lemariBarangMasuk']!.text,
+              )
+                  ? controllers['lemariBarangMasuk']!.text
                   : null,
-
-              hint: const Text(
-                "-- Pilih Lemari --",
-                style: TextStyle(
-                  color: Colors.black26,
-                ),
+              decoration: const InputDecoration(
+                labelText: 'Posisi Lemari',
+                prefixIcon: Icon(Icons.work),
               ),
-
+              hint: const Text('-- Pilih Lemari --'),
               items: lemariListings.map((lemari) {
                 return DropdownMenuItem<String>(
                   value: lemari.lemariposisi,
-                  child: Text(
-                    lemari.lemariposisi,
-                  ),
+                  child: Text(lemari.lemariposisi),
                 );
               }).toList(),
-
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                prefixIcon: Icon(
-                  Icons.work,
-                ),
-              ),
-
               onChanged: (value) async {
-              if (value == null) return;
-              controllersss["lemariBarangMasuk"]!.text = value;
-              dropDownListLemari = value;
-              if (value == "Lemari1") {
-                await kodeBarangDanNomerUrutLemari1 (controllersss, GSheetsServicesEmployees.sheetsLemari1);
-                controllersss["totalBarangMasukLemari1"]?.text = "0";
-                controllersss["totalBarangKeluarLemari1"]?.text = "0";
-                controllersss["jumlahMinimumBarangMasukLemari1"]?.text = "1";
-                controllersss["totalJumlahAkhirLemari1"]?.text =
-                    controllersss["jumlahBarangMasuk"]?.text ?? "0";
-                updateStatusBarang(controllersss, "Lemari1");
+                if (value == null) return;
 
-              } else if (value == "Lemari2") {
-                await kodeBarangDanNomerUrutLemari2 (controllersss, GSheetsServicesEmployees.sheetsLemari2);
-                controllersss["totalBarangMasukLemari2"]?.text = "0";
-                controllersss["totalBarangKeluarLemari2"]?.text = "0";
-                controllersss["jumlahMinimumBarangMasukLemari2"]?.text = "1";
-                controllersss["totalJumlahAkhirLemari2"]?.text =
-                    controllersss["jumlahBarangMasuk"]?.text ?? "0";
-                updateStatusBarang(controllersss, "Lemari2");
+                controllers['lemariBarangMasuk']!.text = value;
+                dropDownListLemari = value;
 
-              } else if (value == "Lemari3") {
-                await kodeBarangDanNomerUrutLemari3 (controllersss, GSheetsServicesEmployees.sheetsLemari3);
-                controllersss["totalBarangMasukLemari3"]?.text = "0";
-                controllersss["totalBarangKeluarLemari3"]?.text = "0";
-                controllersss["jumlahMinimumBarangMasukLemari3"]?.text = "1";
-                controllersss["totalJumlahAkhirLemari3"]?.text =
-                    controllersss["jumlahBarangMasuk"]?.text ?? "0";
-                updateStatusBarang(controllersss, "Lemari3");
-              }
-              if (mounted) setState(() {});
-            },
+                await GSheetsServicesEmployees.init();
+
+                if (value == 'Lemari1') {
+                  await kodeBarangDanNomerUrutLemari1(
+                    controllers,
+                    GSheetsServicesEmployees.sheetsLemari1,
+                  );
+                } else if (value == 'Lemari2') {
+                  await kodeBarangDanNomerUrutLemari2(
+                    controllers,
+                    GSheetsServicesEmployees.sheetsLemari2,
+                  );
+                } else if (value == 'Lemari3') {
+                  await kodeBarangDanNomerUrutLemari3(
+                    controllers,
+                    GSheetsServicesEmployees.sheetsLemari3,
+                  );
+                }
+
+                final suffix = value;
+                controllers['totalBarangMasuk$suffix']!.text = '0';
+                controllers['totalBarangKeluar$suffix']!.text = '0';
+                controllers['jumlahMinimumBarangMasuk$suffix']!.text =
+                '1';
+                controllers['totalJumlahAkhir$suffix']!.text =
+                    controllers['jumlahBarangMasuk']!.text;
+
+                updateStatusBarang(controllers, suffix);
+
+                if (mounted) setState(() {});
+              },
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return "Tolong Pilih Lokasi Lemari";
+                  return 'Tolong pilih lokasi lemari';
                 }
                 return null;
               },
             ),
           ),
+
+          _textField(
+            label: 'Keterangan Barang Masuk',
+            controllerKey: 'keteranganBarangMasuk',
+            controllers: controllers,
+            errorText: 'Keterangan barang masuk tidak boleh kosong!',
+            prefixIcon: const Icon(Icons.note),
+          ),
+
+          const SizedBox(height: 12),
+
           Container(
-            padding: const EdgeInsets.all(10),
-            decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Colors.black87))),
-            child: TextFormField(
-              controller: controllersss["keteranganBarangMasuk"],
-              decoration: const InputDecoration(
-                  labelText: "Keterangan Barang Masuk",
-                  hintText: "Silahkan Masukan Keterangan Barang Masuk",
-                  hintStyle: TextStyle(color: Colors.black26),
-                  border: InputBorder.none,
-                  prefixIcon: Icon(Icons.note)),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return "Keterangan Barang Masuk Tidak Boleh Kosong!";
-                }
-                return null;
-              },
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.black26),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Foto Barang Masuk',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color.fromARGB(255, 8, 36, 87),
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Builder(
+                  builder: (context) {
+                    final foto = widget.fotoBarangMasukMap[fotoKey];
+
+                    if (foto == null) {
+                      return Container(
+                        height: 150,
+                        width: double.infinity,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.add_a_photo,
+                              size: 45,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(height: 8),
+                            Text('Belum ada foto barang'),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.file(
+                        File(foto.path),
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  },
+                ),
+
+                const SizedBox(height: 12),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => pilihFotoBarang(
+                          controllers,
+                          source: ImageSource.camera,
+                        ),
+                        icon: const Icon(Icons.camera_alt),
+                        label: const Text('Ambil Foto'),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => pilihFotoBarang(
+                          controllers,
+                          source: ImageSource.gallery,
+                        ),
+                        icon: const Icon(Icons.photo_library),
+                        label: const Text('Galeri'),
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (widget.fotoBarangMasukMap[fotoKey] != null)
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton.icon(
+                      onPressed: () {
+                        setState(() {
+                          widget.fotoBarangMasukMap.remove(fotoKey);
+                        });
+                      },
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: const Text(
+                        'Hapus Foto',
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
-          const SizedBox(
-            height: 5,
-          ),
+
+          const SizedBox(height: 10),
+
           Wrap(
             alignment: WrapAlignment.end,
             crossAxisAlignment: WrapCrossAlignment.center,
@@ -733,35 +733,26 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
             runSpacing: 5,
             children: [
               const Text(
-                "Barang Masuk Lainya",
-                textAlign: TextAlign.center,
+                'Barang Masuk Lainnya',
                 style: TextStyle(
                   color: Color.fromARGB(255, 8, 36, 87),
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               FloatingActionButton(
                 onPressed: addNewsContainers,
-                heroTag: null,
+                heroTag: 'add-barang-$index',
                 mini: true,
                 backgroundColor: const Color.fromARGB(255, 8, 36, 87),
-                child: const Icon(
-                  Icons.add,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.add, color: Colors.white),
               ),
-
               FloatingActionButton(
                 onPressed: removeRegistContainer,
-                heroTag: null,
+                heroTag: 'remove-barang-$index',
                 mini: true,
                 backgroundColor: Colors.red,
-                child: const Icon(
-                  Icons.delete,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.delete, color: Colors.white),
               ),
             ],
           ),
@@ -771,30 +762,23 @@ class _RevampBarangMasukFieldState extends State<RevampBarangMasukField> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    getListsPosisiLemari();
-  }
-
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Form(
-        key: revampBarangMasukKey,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              if (revampBarangMasukControllerss.isEmpty)
-                startBuildBarangMasukContainers({})
-              else
-                ...revampBarangMasukControllerss.map(
-                      (controllers) => buildsBarangMasukContainers(controllers),
+    return Form(
+      key: revampBarangMasukKey,
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            if (revampBarangMasukControllerss.isEmpty)
+              startBuildBarangMasukContainers()
+            else
+              ...revampBarangMasukControllerss.asMap().entries.map(
+                    (entry) => buildsBarangMasukContainers(
+                  entry.value,
+                  entry.key,
                 ),
-
-              const SizedBox(height: 10),
-            ],
-          ),
+              ),
+            const SizedBox(height: 10),
+          ],
         ),
       ),
     );

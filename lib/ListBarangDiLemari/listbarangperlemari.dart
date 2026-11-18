@@ -344,7 +344,6 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
             // ====================================================
             // HEADER
             // ====================================================
-
             Stack(
               children: [
                 Container(
@@ -510,33 +509,25 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
             // ====================================================
 
             Expanded(
-              child: isLoading
-                  ? const Center(
+              child: isLoading ? const Center(
                 child: CircularProgressIndicator(),
-              )
-                  : filteredBarang.isEmpty
-                  ? const Center(
+              ) : filteredBarang.isEmpty ? const Center(
                 child: Text(
                   "Data barang tidak ditemukan",
                   style: TextStyle(
                     fontSize: 16,
                   ),
                 ),
-              )
-                  : ListView.builder(
-                padding:
-                const EdgeInsets.symmetric(
+              ) : ListView.builder(
+                padding: const EdgeInsets.symmetric(
                   horizontal: 12,
                 ),
                 itemCount: filteredBarang.length,
                 itemBuilder:
                     (context, index) {
-                  final barang =
-                  filteredBarang[index];
-
+                  final barang = filteredBarang[index];
                   return InkWell(
-                    borderRadius:
-                    BorderRadius.circular(15),
+                    borderRadius: BorderRadius.circular(15),
 
                     onTap: () {
                       Get.to(
@@ -548,47 +539,59 @@ class _ListbarangperlemariState extends State<Listbarangperlemari> {
 
                     child: Card(
                       elevation: 2,
-                      margin:
-                      const EdgeInsets.only(
+                      margin: const EdgeInsets.only(
                         bottom: 12,
                       ),
-                      shape:
-                      RoundedRectangleBorder(
-                        borderRadius:
-                        BorderRadius.circular(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
                           15,
                         ),
                       ),
 
                       child: Padding(
-                        padding:
-                        const EdgeInsets.all(
+                        padding: const EdgeInsets.all(
                           12,
                         ),
 
                         child: Row(
                           children: [
                             // ==================================
-                            // ICON BARANG
+                            // ICON / FOTO BARANG INVENTORY
                             // ==================================
-
                             Container(
                               width: 55,
                               height: 55,
-                              decoration:
-                              BoxDecoration(
-                                color: Colors
-                                    .grey.shade200,
-                                borderRadius:
-                                BorderRadius
-                                    .circular(
-                                  10,
-                                ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: const Icon(
-                                Icons.inventory_2,
-                                size: 30,
-                                color: Colors.grey,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: (barang["Url Foto"] != null && barang["Url Foto"]!.isNotEmpty) ? Image.network(
+                                  barang["Url Foto"]!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.inventory_2,
+                                      size: 30,
+                                      color: Colors.grey,
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    );
+                                  },
+                                ) : const Icon(
+                                  Icons.inventory_2,
+                                  size: 30,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ),
 
